@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: #9ca3af; /* 提示文字的顏色 (灰) */
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

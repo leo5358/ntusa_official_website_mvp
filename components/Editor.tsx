@@ -4,8 +4,9 @@ import { useState, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
+import Placeholder from "@tiptap/extension-placeholder"; // 引入 Placeholder
 import { useRouter } from "next/navigation";
-import { uploadImage } from "../lib/upload"; // 引入我們剛剛抽離的工具
+import { uploadImage } from "../lib/upload";
 
 interface EditorProps {
   authorEmail: string;
@@ -14,7 +15,6 @@ interface EditorProps {
 export default function Editor({ authorEmail }: EditorProps) {
   const router = useRouter();
   
-  // 狀態管理
   const [title, setTitle] = useState("");
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,12 +24,20 @@ export default function Editor({ authorEmail }: EditorProps) {
 
   // 初始化 Tiptap 編輯器
   const editor = useEditor({
-    extensions: [StarterKit, Image],
+    extensions: [
+      StarterKit,
+      Image,
+      Placeholder.configure({
+        placeholder: "請在此輸入文章內容...",
+        emptyEditorClass: "is-editor-empty",
+      }),
+    ],
     immediatelyRender: false,
-    content: "<p>請在此輸入文章內容...</p>",
+    content: "", // 清空預設內容，改由 Placeholder 接手
     editorProps: {
       attributes: {
-        className: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] border border-gray-300 rounded-md p-4",
+        // 加入 text-gray-900 強制深色文字，避免在深色模式下變成白底白字
+        className: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[400px] border border-gray-300 rounded-md p-4 text-gray-900",
       },
     },
   });
@@ -44,7 +52,7 @@ export default function Editor({ authorEmail }: EditorProps) {
     }
   };
 
-  // 處理內文圖片上傳 (插入 Tiptap)
+  // 處理內文圖片上傳
   const onEditorImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0] && editor) {
       setIsUploadingImage(true);
@@ -54,12 +62,10 @@ export default function Editor({ authorEmail }: EditorProps) {
       }
       setIsUploadingImage(false);
       
-      // 清空 input 的值，這樣重複上傳同一張圖片才會觸發 onChange
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  // 提交文章到資料庫
   const handleSubmit = async () => {
     if (!title.trim() || !editor || editor.isEmpty) {
       alert("請填寫標題與內容！");
@@ -93,8 +99,12 @@ export default function Editor({ authorEmail }: EditorProps) {
     }
   };
 
+  // 封裝按鈕樣式函數，讓工具列程式碼更乾淨
+  const getButtonClass = (isActive: boolean = false) => 
+    `px-2 py-1.5 rounded text-sm font-medium transition-colors ${isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-200'}`;
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 text-gray-900">
       {/* 標題區 */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">文章標題</label>
@@ -103,7 +113,7 @@ export default function Editor({ authorEmail }: EditorProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="請輸入一個響亮的標題..."
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
         />
       </div>
 
@@ -123,35 +133,42 @@ export default function Editor({ authorEmail }: EditorProps) {
       </div>
 
       {/* 編輯器工具列與內文區 */}
-      <div className="border border-gray-200 rounded-md bg-gray-50 shadow-sm">
-        {/* 工具列 */}
-        <div className="border-b border-gray-200 p-2 flex gap-2 bg-white rounded-t-md">
-           <button 
-             onClick={() => editor?.chain().focus().toggleBold().run()}
-             className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor?.isActive('bold') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
-           >
-             粗體
-           </button>
-           <button 
-             onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-             className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor?.isActive('heading', { level: 2 }) ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
-           >
-             H2 標題
-           </button>
+      <div className="border border-gray-300 rounded-md bg-gray-50 shadow-sm overflow-hidden">
+        {/* 工具列 (支援換行顯示) */}
+        <div className="border-b border-gray-300 p-2 flex flex-wrap gap-1 bg-gray-100">
+           {/* 文字樣式 */}
+           <button onClick={() => editor?.chain().focus().toggleBold().run()} className={getButtonClass(editor?.isActive('bold'))}>粗體</button>
+           <button onClick={() => editor?.chain().focus().toggleItalic().run()} className={getButtonClass(editor?.isActive('italic'))}>斜體</button>
+           <button onClick={() => editor?.chain().focus().toggleStrike().run()} className={getButtonClass(editor?.isActive('strike'))}>刪除線</button>
            
-           <div className="w-px bg-gray-300 mx-1"></div> {/* 分隔線 */}
+           <div className="w-px bg-gray-300 mx-1 my-1"></div>
+           
+           {/* 標題 */}
+           <button onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} className={getButtonClass(editor?.isActive('heading', { level: 1 }))}>H1</button>
+           <button onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} className={getButtonClass(editor?.isActive('heading', { level: 2 }))}>H2</button>
+           <button onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()} className={getButtonClass(editor?.isActive('heading', { level: 3 }))}>H3</button>
+           
+           <div className="w-px bg-gray-300 mx-1 my-1"></div>
 
-           {/* 隱藏的檔案上傳輸入框 */}
-           <input 
-             type="file" 
-             accept="image/*" 
-             ref={fileInputRef} 
-             onChange={onEditorImageChange} 
-             className="hidden" 
-           />
+           {/* 列表與區塊 */}
+           <button onClick={() => editor?.chain().focus().toggleBulletList().run()} className={getButtonClass(editor?.isActive('bulletList'))}>項目清單</button>
+           <button onClick={() => editor?.chain().focus().toggleOrderedList().run()} className={getButtonClass(editor?.isActive('orderedList'))}>編號清單</button>
+           <button onClick={() => editor?.chain().focus().toggleBlockquote().run()} className={getButtonClass(editor?.isActive('blockquote'))}>引用</button>
+           <button onClick={() => editor?.chain().focus().setHorizontalRule().run()} className={getButtonClass()}>分隔線</button>
+
+           <div className="w-px bg-gray-300 mx-1 my-1"></div>
+
+           {/* 歷史紀錄 */}
+           <button onClick={() => editor?.chain().focus().undo().run()} disabled={!editor?.can().undo()} className="px-2 py-1.5 rounded text-sm font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-30">復原</button>
+           <button onClick={() => editor?.chain().focus().redo().run()} disabled={!editor?.can().redo()} className="px-2 py-1.5 rounded text-sm font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-30">重做</button>
+
+           <div className="flex-grow"></div> {/* 將插入圖片推到最右邊 */}
+
+           {/* 插入圖片 */}
+           <input type="file" accept="image/*" ref={fileInputRef} onChange={onEditorImageChange} className="hidden" />
            <button 
              onClick={() => fileInputRef.current?.click()}
-             className="px-3 py-1.5 rounded text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50"
+             className="px-3 py-1.5 rounded text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors disabled:opacity-50 border border-blue-200"
              disabled={isUploadingImage}
            >
              {isUploadingImage ? "圖片上傳中..." : "插入圖片"}
@@ -159,7 +176,7 @@ export default function Editor({ authorEmail }: EditorProps) {
         </div>
         
         {/* Tiptap 編輯器本體 */}
-        <EditorContent editor={editor} className="bg-white min-h-[300px] rounded-b-md" />
+        <EditorContent editor={editor} className="bg-white min-h-[400px] cursor-text" onClick={() => editor?.commands.focus()} />
       </div>
 
       {/* 提交按鈕 */}
