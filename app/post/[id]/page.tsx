@@ -1,6 +1,9 @@
 import prisma from "../../../lib/prisma"; // 根據資料夾層級往外找 3 層
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import DeleteButton from "../../../components/DeleteButton";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../../lib/auth";
 
 // Next.js 15+ 規定 params 是一個 Promise，必須標註型別為 Promise
 interface PostPageProps {
@@ -10,6 +13,9 @@ interface PostPageProps {
 export default async function PostPage({ params }: PostPageProps) {
   // 1. 等待並解構出網址上的 id 參數
   const { id } = await params;
+
+  // 新增：取得目前登入狀態
+  const session = await getServerSession(authOptions);
 
   // 2. 透過 ID 從 Neon 資料庫撈取這篇文章的完整內容
   const post = await prisma.post.findUnique({
@@ -23,11 +29,19 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* 返回按鈕 */}
-      <div className="mb-8">
-        <Link href="/" className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center transition-colors">
+      {/* 頂部導覽區 */}
+      <div className="mb-8 flex justify-between items-center">
+        <Link
+          href="/"
+          className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center transition-colors"
+        >
           &larr; 返回首頁
         </Link>
+
+        {/* ⭐ 新增：登入時顯示刪除按鈕 */}
+        {session && session.user && (
+          <DeleteButton postId={post.id} />
+        )}
       </div>
 
       <article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -57,15 +71,11 @@ export default async function PostPage({ params }: PostPageProps) {
                 })}
               </time>
               <span>•</span>
-              {/* 取信箱 @ 前面的字串當作作者名稱顯示 */}
-              <span>作者：{post.authorEmail.split("@")[0]}</span> 
+              <span>作者：{post.authorEmail.split("@")[0]}</span>
             </div>
           </header>
 
-          {/* 文章內文 (Tiptap 產生的 HTML) 
-            dangerouslySetInnerHTML 讓我們可以把字串當作真實的 HTML 渲染出來
-            prose 類別則是 Tailwind Typography 提供的心法，讓它瞬間變好看！
-          */}
+          {/* 文章內文 */}
           <div
             className="prose prose-blue prose-lg max-w-none text-gray-700 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: post.content }}
