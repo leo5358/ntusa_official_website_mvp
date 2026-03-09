@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css"; // 引入 Tailwind CSS
+import "./globals.css"; 
 import Providers from "../components/Providers";
-import Navbar from "../components/Navbar"; // 先引入，我們下一步就來寫它
+import Navbar from "../components/Navbar"; 
 
 const inter = Inter({ subsets: ["latin"] });
 

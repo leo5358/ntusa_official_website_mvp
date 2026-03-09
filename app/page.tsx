@@ -1,65 +1,94 @@
-import Image from "next/image";
+import Link from "next/link";
+import prisma from "../lib/prisma"; // 直接引入資料庫連線
 
-export default function Home() {
+// 幫助我們把 Tiptap 產生的 HTML 標籤過濾掉，只留下純文字當作摘要
+function stripHtml(html: string) {
+  return html.replace(/<[^>]*>?/gm, '');
+}
+
+export default async function Home() {
+  // 1. 在伺服器端直接向資料庫撈取所有文章，並依照建立時間由新到舊排序
+  const posts = await prisma.post.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      
+      {/* Hero 歡迎區塊 */}
+      <div className="text-center mb-16">
+        <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
+          國立台灣大學學生會
+        </h1>
+        <p className="mt-4 text-xl text-gray-500">
+          最新消息與動態公告
+        </p>
+      </div>
+
+      {/* 文章列表區塊 */}
+      <div className="space-y-16">
+        {posts.length === 0 ? (
+          <div className="text-center text-gray-500 py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+            目前還沒有任何文章喔！請使用右上角登入後發布第一篇文章吧。
+          </div>
+        ) : (
+          posts.map((post, index) => {
+            // 2. 核心邏輯：判斷目前是第幾篇，偶數篇圖在左，奇數篇圖在右
+            const isEven = index % 2 === 0;
+            // 產生 100 字的文章摘要
+            const excerpt = stripHtml(post.content).substring(0, 100) + "...";
+
+            return (
+              <div 
+                key={post.id} 
+                // 透過 Tailwind 的 md:flex-row-reverse 達成交錯排版
+                className={`flex flex-col md:flex-row ${isEven ? "" : "md:flex-row-reverse"} gap-8 items-center bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 transition-all hover:shadow-lg`}
+              >
+                {/* 圖片區塊 (佔一半寬度) */}
+                <div className="w-full md:w-1/2 h-64 md:h-80 relative bg-gray-100 flex-shrink-0">
+                  {post.coverImage ? (
+                    <img 
+                      src={post.coverImage} 
+                      alt={post.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
+                      <span className="text-lg font-medium">台大學生會</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 文字區塊 (佔另一半寬度) */}
+                <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center">
+                  <div className="text-sm text-blue-600 font-semibold mb-2 tracking-wide">
+                    {new Date(post.createdAt).toLocaleDateString("zh-TW", { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4 line-clamp-2">
+                    {post.title}
+                  </h2>
+                  <p className="text-gray-600 mb-6 line-clamp-3 leading-relaxed">
+                    {excerpt}
+                  </p>
+                  
+                  {/* 閱讀全文按鈕 (目前預留路由，下一步實作) */}
+                  <div>
+                    <Link 
+                      href={`/post/${post.id}`} 
+                      className="inline-flex items-center font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      閱讀全文
+                      <svg className="ml-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
     </div>
   );
 }
