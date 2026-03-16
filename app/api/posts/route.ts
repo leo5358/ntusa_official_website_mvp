@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../lib/auth";
-import prisma from "../../../lib/prisma"; // 引入剛剛寫好的資料庫連線
+import prisma from "../../../lib/prisma";
 
 // 明確使用 HTTP 方法的具名匯出 (Named Export)
 export async function POST(request: Request) {
@@ -27,6 +27,7 @@ export async function POST(request: Request) {
         content,
         coverImage,
         authorEmail,
+        // 這裡不需要給 status，因為 Schema 已經設定預設為 PENDING
       },
     });
 
@@ -39,11 +40,12 @@ export async function POST(request: Request) {
   }
 }
 
-// 預留 GET 方法，稍後首頁撈取文章會用到
+// 用於首頁撈取文章
 export async function GET() {
   try {
-    // 撈取所有文章，並依照建立時間由新到舊排序
+    // 撈取狀態為 APPROVED 的所有文章，並依照建立時間由新到舊排序
     const posts = await prisma.post.findMany({
+      where: { status: "APPROVED" },
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(posts);

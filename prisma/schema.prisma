@@ -6,12 +6,21 @@ datasource db {
   provider = "postgresql"
 }
 
+// 定義文章的狀態列舉
+enum PostStatus {
+  DRAFT     // 草稿 (如果需要的話)
+  PENDING   // 待審核 (預設)
+  APPROVED  // 已審核通過 (正式發布)
+  REJECTED  // 審核退回
+}
+
 model Post {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   title       String
   content     String
   coverImage  String?
   authorEmail String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status      PostStatus @default(PENDING) // 新增狀態欄位，預設為待審核
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }

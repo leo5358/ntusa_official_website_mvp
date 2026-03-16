@@ -9,6 +9,9 @@ function stripHtml(html: string) {
 export default async function Home() {
   // 1. 在伺服器端直接向資料庫撈取所有文章，並依照建立時間由新到舊排序
   const posts = await prisma.post.findMany({
+    where: { 
+      status: "APPROVED"
+    },
     orderBy: { createdAt: "desc" },
   });
 
