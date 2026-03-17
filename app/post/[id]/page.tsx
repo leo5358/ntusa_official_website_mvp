@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import DeleteButton from "../../../components/DeleteButton"; // 引入刪除按鈕元件
 
 export default async function PostPage({ 
   params 
@@ -22,27 +23,22 @@ export default async function PostPage({
     notFound();
   }
 
+  // 取得目前登入者的 Session (用於判斷權限)
+  const session = await getServerSession(authOptions);
+
   // 3. 安全性攔截邏輯：如果文章不是「已核准」狀態
   if (post.status !== "APPROVED") {
-    const session = await getServerSession(authOptions);
-    
     // 如果沒有登入，直接回傳 404，不讓訪客知道這篇文章的存在
     if (!session || !session.user) {
       notFound(); 
     }
-
-    // TODO: 未來 Phase 2 實作完整角色權限 (RBAC) 時，可以在這裡進一步限制：
-    // const isAuthor = session.user.email === post.authorEmail;
-    // const isReviewer = session.user.role === "reviewer";
-    // 如果既不是作者也不是公關部，就 notFound()
-    // if (!isAuthor && !isReviewer) notFound();
   }
 
   // 4. 渲染文章頁面
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       
-      {/* 提示區塊：如果這是一篇未公開的文章，顯示警告橫幅給作者或審核者看 */}
+      {/* 提示區塊：如果這是一篇未公開的文章，顯示警告橫幅給內部人員看 */}
       {post.status !== "APPROVED" && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r-md">
           <div className="flex">
@@ -86,14 +82,19 @@ export default async function PostPage({
         dangerouslySetInnerHTML={{ __html: post.content }} 
       />
 
-      {/* 返回按鈕 */}
-      <div className="mt-12 pt-8 border-t">
+      {/* 底部操作區塊：包含「返回首頁」與「刪除文章」 */}
+      <div className="mt-12 pt-8 border-t flex justify-between items-center">
         <Link href="/" className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center transition-colors">
           <svg className="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           返回首頁
         </Link>
+
+        {/* 只有「文章原作者」才看得到刪除按鈕 */}
+        {session?.user?.email === post.authorEmail && (
+          <DeleteButton postId={post.id} />
+        )}
       </div>
       
     </div>
