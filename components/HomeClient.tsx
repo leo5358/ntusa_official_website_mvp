@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
-// 定義文章型別
 type PostType = {
   id: string;
   title: string;
@@ -16,7 +15,6 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
   const [activeTab, setActiveTab] = useState("home");
   const [dataTab, setDataTab] = useState("minutes");
 
-  // SPA Hash 路由監聽
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace("#", "") || "home";
@@ -28,11 +26,10 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
     };
     
     window.addEventListener("hashchange", handleHashChange);
-    handleHashChange(); // Init
+    handleHashChange(); 
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  // Intersection Observer 動畫載入
   useEffect(() => {
     const observerOptions = { threshold: 0.12, rootMargin: "0px 0px -40px 0px" };
     const fadeObserver = new IntersectionObserver((entries) => {
@@ -44,27 +41,41 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
       });
     }, observerOptions);
 
-    // 抓取所有有 fade-up-target 的元素套用動畫
     document.querySelectorAll(".fade-up-target").forEach((el, i) => {
-      (el as HTMLElement).style.setProperty("--delay", `${i * 60}ms`);
+      (el as HTMLElement).style.setProperty("--delay", `${(i % 5) * 60}ms`);
       el.classList.add("fade-up");
       fadeObserver.observe(el);
     });
 
-    return () => fadeObserver.disconnect();
-  }, [activeTab]); // 每當切換分頁時重新綁定動畫
+    return () => fadeObserver.disconnect(); }, [activeTab]);
+
+  const navigateTo = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    window.history.pushState(null, "", `/#${id}`);
+    window.dispatchEvent(new Event("hashchange"));
+  };
+
+  const depts = ["會本部", "秘書處", "學術部", "公關部", "資訊部", "財務部", "國際部", "選舉罷免執行委員會"];
 
   return (
     <>
       {/* ── PAGE: 首頁 ── */}
       <section className={`page ${activeTab === "home" ? "active" : ""}`} id="home">
         <div className="hero">
-          <div className="hero-bg-placeholder"></div>
+          <div className="hero-bg-placeholder">
+            <span className="hero-placeholder-label">主視覺橫幅（Banner 圖片區）</span>
+          </div>
           <div className="hero-overlay"></div>
           <div className="hero-content fade-up-target">
             <h1 className="hero-title">臺大學生會</h1>
             <p className="hero-desc">代表每一位臺大學生，守護學生權益、促進校園民主。</p>
-            <Link href="/#rights" className="btn btn-primary">查看最新學權公告</Link>
+            <a href="/#rights" onClick={(e) => navigateTo(e, "rights")} className="btn btn-primary">
+              查看最新學權公告
+            </a>
+          </div>
+          <div className="hero-scroll-hint">
+            <span>向下捲動</span>
+            <div className="scroll-arrow"></div>
           </div>
         </div>
 
@@ -81,7 +92,7 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
             ) : (
               posts.map((post) => (
                 <article key={post.id} className="news-card fade-up-target" role="article">
-                  <div className="news-card-img" style={{ backgroundImage: `url(${post.coverImage || ''})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                  <div className="news-card-img" style={post.coverImage ? { backgroundImage: `url(${post.coverImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
                     {!post.coverImage && "📄"}
                   </div>
                   <div className="news-card-body">
@@ -99,42 +110,116 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
               ))
             )}
           </div>
+          
+          <div className="section-footer fade-up-target">
+            <a href="/#rights" onClick={(e) => navigateTo(e, "rights")} className="btn btn-outline">
+              查看所有公告 →
+            </a>
+          </div>
         </div>
       </section>
 
       {/* ── PAGE: 關於我們 ── */}
       <section className={`page ${activeTab === "about" ? "active" : ""}`} id="about">
-         <div className="page-hero-mini">
+        <div className="page-hero-mini">
           <div className="page-hero-mini-content">
+            <div className="section-tag">About Us</div>
             <h1 className="page-title">關於我們</h1>
+            <p className="page-desc">臺大學生會由全體學生組成，各部門協力推動校園事務。</p>
           </div>
         </div>
+
         <div className="section-wrap">
+          <div className="section-header fade-up-target">
+            <div className="section-tag">關於臺大學生會</div>
+            <h2 className="section-title">歷史沿革</h2>
+            <p className="section-sub">請不知道誰講古一下</p>
+          </div>
+        </div>
+
+        <div className="section-wrap">
+          <div className="section-header fade-up-target">
+            <div className="section-tag">部門介紹</div>
+            <h2 className="section-title">各部門工作內容</h2>
+            <p className="section-sub">學生會由多個部門共同運作，各司其職，守護學生權益</p>
+          </div>
+
           <div className="dept-grid">
-            <div className="dept-card fade-up-target">
-              <h3 className="dept-name">會本部</h3>
-              <p className="dept-desc">部門簡介尚未提供，敬請期待。</p>
-            </div>
-            {/* 這裡可以依序補齊你原本的其餘部門卡片 */}
+            {depts.map((dept) => (
+              <div className="dept-card fade-up-target" key={dept}>
+                <h3 className="dept-name">{dept}</h3>
+                <p className="dept-desc dept-placeholder">部門簡介尚未提供，敬請期待。</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ── PAGE: 學權公告 ── */}
       <section className={`page ${activeTab === "rights" ? "active" : ""}`} id="rights">
-        {/* 請貼上你 index.html 裡的 #rights 內容 */}
+        <div className="page-hero-mini">
+          <div className="page-hero-mini-content">
+            <div className="section-tag">Student Rights</div>
+            <h1 className="page-title">學權公告</h1>
+            <p className="page-desc">學生會關於學生權益之最新公告、聲明與說明。</p>
+          </div>
+        </div>
+
+        <div className="section-wrap">
+          <div className="rights-placeholder-box fade-up-target">
+            <div className="placeholder-icon">📢</div>
+            <h3>學權公告系統</h3>
+            <p>此區塊將與後端發文系統進行連動，<br/>公告內容將由後端自動帶入顯示。</p>
+            <div className="placeholder-badge">後端連動預留區</div>
+          </div>
+        </div>
       </section>
 
       {/* ── PAGE: 表單連結 ── */}
       <section className={`page ${activeTab === "forms" ? "active" : ""}`} id="forms">
-        {/* 請貼上你 index.html 裡的 #forms 內容 */}
+        <div className="page-hero-mini">
+          <div className="page-hero-mini-content">
+            <div className="section-tag">Forms</div>
+            <h1 className="page-title">表單連結</h1>
+            <p className="page-desc">學生申訴、意見回饋及其他學生會表單連結一覽。</p>
+          </div>
+        </div>
+
+        <div className="section-wrap">
+          <div className="forms-grid">
+            <div className="form-card fade-up-target">
+              <div className="form-card-header"><span className="form-tag">申訴</span></div>
+              <h3 className="form-title">學生申訴表單</h3>
+              <p className="form-desc form-placeholder">連結尚未提供，即將上線。</p>
+              <button className="btn btn-primary btn-sm disabled">即將上線</button>
+            </div>
+            <div className="form-card fade-up-target">
+              <div className="form-card-header"><span className="form-tag">意見</span></div>
+              <h3 className="form-title">意見回饋表單</h3>
+              <p className="form-desc form-placeholder">連結尚未提供，即將上線。</p>
+              <button className="btn btn-primary btn-sm disabled">即將上線</button>
+            </div>
+            <div className="form-card fade-up-target">
+              <div className="form-card-header"><span className="form-tag">合作</span></div>
+              <h3 className="form-title">活動合作申請</h3>
+              <p className="form-desc form-placeholder">連結尚未提供，即將上線。</p>
+              <button className="btn btn-primary btn-sm disabled">即將上線</button>
+            </div>
+            <div className="form-card add-card fade-up-target">
+              <span className="add-icon">+</span>
+              <p>更多表單即將新增</p>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ── PAGE: 公開資料 ── */}
       <section className={`page ${activeTab === "data" ? "active" : ""}`} id="data">
         <div className="page-hero-mini">
           <div className="page-hero-mini-content">
+            <div className="section-tag">Public Records</div>
             <h1 className="page-title">公開資料</h1>
+            <p className="page-desc">學生會會議紀錄、決預算及其他公開文件。</p>
           </div>
         </div>
 
@@ -146,13 +231,28 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
           </div>
 
           <div className={`data-panel ${dataTab === "minutes" ? "active" : ""}`}>
-             {/* 貼上原本 tab-minutes 的內容 */}
+            <div className="rights-placeholder-box fade-up-target">
+              <div className="placeholder-icon">📄</div>
+              <h3>會議紀錄</h3>
+              <p>此區塊將嵌入 Google Docs 或 Google Sheets，<br/>屆時會議紀錄將公開於此。</p>
+              <div className="placeholder-badge">Google Docs / Sheets 嵌入區</div>
+            </div>
           </div>
           <div className={`data-panel ${dataTab === "budget" ? "active" : ""}`}>
-             {/* 貼上原本 tab-budget 的內容 */}
+            <div className="rights-placeholder-box fade-up-target">
+              <div className="placeholder-icon">💰</div>
+              <h3>決預算</h3>
+              <p>此區塊將嵌入 Google Sheets，<br/>學生會決預算資料將公開於此。</p>
+              <div className="placeholder-badge">Google Sheets 嵌入區</div>
+            </div>
           </div>
           <div className={`data-panel ${dataTab === "other" ? "active" : ""}`}>
-             {/* 貼上原本 tab-other 的內容 */}
+            <div className="rights-placeholder-box fade-up-target">
+              <div className="placeholder-icon">📂</div>
+              <h3>其他文件</h3>
+              <p>其他公開資料將陸續更新於此。</p>
+              <div className="placeholder-badge">文件嵌入區</div>
+            </div>
           </div>
         </div>
       </section>

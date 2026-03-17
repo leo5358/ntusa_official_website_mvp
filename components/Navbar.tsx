@@ -8,7 +8,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [activeHash, setActiveHash] = useState("home");
 
-  // 監聽滾動與 Hash 變更
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 8);
     const handleHash = () => {
@@ -17,8 +16,6 @@ export default function Navbar() {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("hashchange", handleHash);
-    
-    // 初始化設定
     handleHash();
 
     return () => {
@@ -27,7 +24,6 @@ export default function Navbar() {
     };
   }, []);
 
-  // 處理鍵盤與抽屜開關
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeDrawer();
@@ -46,6 +42,16 @@ export default function Navbar() {
     document.body.style.overflow = "";
   };
 
+  // 自訂跳轉邏輯，解決 Next.js 擋住 hash 跳轉的問題
+  const navigateTo = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    if (typeof window !== "undefined" && window.location.pathname === "/") {
+      e.preventDefault();
+      window.history.pushState(null, "", `/#${id}`);
+      window.dispatchEvent(new Event("hashchange")); // 手動觸發首頁切換
+    }
+    closeDrawer();
+  };
+
   const navLinks = [
     { id: "home", label: "首頁" },
     { id: "about", label: "關於我們" },
@@ -58,7 +64,7 @@ export default function Navbar() {
     <>
       <header className={`navbar ${scrolled ? "scrolled" : ""}`} id="navbar">
         <div className="nav-inner">
-          <Link href="/#home" className="nav-logo" onClick={closeDrawer}>
+          <Link href="/#home" className="nav-logo" onClick={(e) => navigateTo(e, "home")}>
             <div className="logo-mark">logo</div>
             <div className="logo-text">
               <span className="logo-title">臺大學生會</span>
@@ -68,13 +74,14 @@ export default function Navbar() {
 
           <nav className="nav-links">
             {navLinks.map((link) => (
-              <Link
+              <a
                 key={link.id}
                 href={`/#${link.id}`}
+                onClick={(e) => navigateTo(e, link.id)}
                 className={`nav-link ${activeHash === link.id ? "active" : ""}`}
               >
                 {link.label}
-              </Link>
+              </a>
             ))}
           </nav>
 
@@ -89,14 +96,9 @@ export default function Navbar() {
       </header>
 
       {/* 手機版側邊選單 */}
-      <div
-        className={`drawer-overlay ${isDrawerOpen ? "open" : ""}`}
-        onClick={closeDrawer}
-      ></div>
+      <div className={`drawer-overlay ${isDrawerOpen ? "open" : ""}`} onClick={closeDrawer}></div>
       <aside className={`drawer ${isDrawerOpen ? "open" : ""}`} id="drawer">
-        <button className="drawer-close" onClick={closeDrawer} aria-label="關閉選單">
-          ✕
-        </button>
+        <button className="drawer-close" onClick={closeDrawer} aria-label="關閉選單">✕</button>
         <div className="drawer-logo">
           <div className="logo-mark"></div>
           <div className="logo-text">
@@ -106,14 +108,14 @@ export default function Navbar() {
         </div>
         <nav className="drawer-nav">
           {navLinks.map((link) => (
-            <Link
+            <a
               key={link.id}
               href={`/#${link.id}`}
+              onClick={(e) => navigateTo(e, link.id)}
               className={`drawer-link ${activeHash === link.id ? "active" : ""}`}
-              onClick={closeDrawer}
             >
               {link.label}
-            </Link>
+            </a>
           ))}
         </nav>
       </aside>

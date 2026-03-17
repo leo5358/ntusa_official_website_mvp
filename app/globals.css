@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@layer base {
+  h1, .h1 { font-size: 32px; font-weight: 700; line-height: 1.25; }
+  h2, .h2 { font-size: 20px; font-weight: 700; line-height: 1.4; }
+  h3, .title { font-size: 16px; font-weight: 600; line-height: 1.5; }
+  p, .body { font-size: 16px; font-weight: 400; }
+  a { text-decoration: none; color: inherit; }
+  button { background: none; border: none; cursor: pointer; padding: 0; }
+}
 
 .tiptap p.is-editor-empty:first-child::before {
   color: #9ca3af; /* 提示文字的顏色 (灰) */
