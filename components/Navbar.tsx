@@ -1,61 +1,122 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function Navbar() {
-  // 取得目前的登入狀態 (session 包含使用者資訊，status 包含 loading/authenticated/unauthenticated)
-  const { data: session, status } = useSession();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeHash, setActiveHash] = useState("home");
+
+  // 監聽滾動與 Hash 變更
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 8);
+    const handleHash = () => {
+      setActiveHash(window.location.hash.replace("#", "") || "home");
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("hashchange", handleHash);
+    
+    // 初始化設定
+    handleHash();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("hashchange", handleHash);
+    };
+  }, []);
+
+  // 處理鍵盤與抽屜開關
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeDrawer();
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
+  const openDrawer = () => {
+    setIsDrawerOpen(true);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeDrawer = () => {
+    setIsDrawerOpen(false);
+    document.body.style.overflow = "";
+  };
+
+  const navLinks = [
+    { id: "home", label: "首頁" },
+    { id: "about", label: "關於我們" },
+    { id: "rights", label: "學權公告" },
+    { id: "forms", label: "表單連結" },
+    { id: "data", label: "公開資料" },
+  ];
 
   return (
-    <nav className="bg-white shadow-md fixed w-full z-10 top-0 left-0">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          
-          {/* 左側：網站 Logo 或名稱 */}
-          <div className="flex-shrink-0">
-            <Link href="/" className="text-xl font-bold text-gray-800 hover:text-gray-600">
-              台大學生會官網
-            </Link>
-          </div>
+    <>
+      <header className={`navbar ${scrolled ? "scrolled" : ""}`} id="navbar">
+        <div className="nav-inner">
+          <Link href="/#home" className="nav-logo" onClick={closeDrawer}>
+            <div className="logo-mark">logo</div>
+            <div className="logo-text">
+              <span className="logo-title">臺大學生會</span>
+              <span className="logo-sub">NTU Student Association</span>
+            </div>
+          </Link>
 
-          {/* 右側：登入狀態與按鈕 */}
-          <div className="flex items-center space-x-4">
-            {status === "loading" ? (
-              <span className="text-gray-500">載入中...</span>
-            ) : session ? (
-              // 已經登入顯示的畫面
-              <>
-                <span className="text-sm text-gray-600 hidden sm:block">
-                  {session.user?.name} ({session.user?.email})
-                </span>
-                <Link 
-                  href="/editor" 
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  發布文章
-                </Link>
-                <button
-                  onClick={() => signOut()}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  登出
-                </button>
-              </>
-            ) : (
-              // 尚未登入顯示的畫面
-              <button
-                // 點擊後直接觸發 Google 登入流程
-                onClick={() => signIn("google")}
-                className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+          <nav className="nav-links">
+            {navLinks.map((link) => (
+              <Link
+                key={link.id}
+                href={`/#${link.id}`}
+                className={`nav-link ${activeHash === link.id ? "active" : ""}`}
               >
-                學生會信箱登入
-              </button>
-            )}
-          </div>
+                {link.label}
+              </Link>
+            ))}
+          </nav>
 
+          <button
+            className={`hamburger ${isDrawerOpen ? "open" : ""}`}
+            onClick={isDrawerOpen ? closeDrawer : openDrawer}
+            aria-label="開啟選單"
+          >
+            <span></span><span></span><span></span>
+          </button>
         </div>
-      </div>
-    </nav>
+      </header>
+
+      {/* 手機版側邊選單 */}
+      <div
+        className={`drawer-overlay ${isDrawerOpen ? "open" : ""}`}
+        onClick={closeDrawer}
+      ></div>
+      <aside className={`drawer ${isDrawerOpen ? "open" : ""}`} id="drawer">
+        <button className="drawer-close" onClick={closeDrawer} aria-label="關閉選單">
+          ✕
+        </button>
+        <div className="drawer-logo">
+          <div className="logo-mark"></div>
+          <div className="logo-text">
+            <span className="logo-title">臺大學生會</span>
+            <span className="logo-sub">NTU Student Association</span>
+          </div>
+        </div>
+        <nav className="drawer-nav">
+          {navLinks.map((link) => (
+            <Link
+              key={link.id}
+              href={`/#${link.id}`}
+              className={`drawer-link ${activeHash === link.id ? "active" : ""}`}
+              onClick={closeDrawer}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      </aside>
+    </>
   );
 }
