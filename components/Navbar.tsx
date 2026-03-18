@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react"; // 引入 session 與登出功能
+import { useSession, signOut } from "next-auth/react";
 
 export default function Navbar() {
-  const { data: session } = useSession(); // 抓取登入狀態
+  const { data: session } = useSession();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeHash, setActiveHash] = useState("home");
@@ -84,12 +84,16 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
-            
-            {/*  只有登入後才會顯示的按鈕 */}
+
+            {/* 登入後才會顯示的按鈕 */}
             {session && (
               <>
+                <div style={{ width: "1px", height: "20px", background: "var(--color-border)", margin: "0 8px" }}></div>
                 <Link href="/editor" className="nav-link" style={{ color: "var(--color-brand-dark)", fontWeight: "bold" }}>
                   新增公告
+                </Link>
+                <Link href="/review" className="nav-link" style={{ color: "var(--color-secondary)", fontWeight: "bold" }}>
+                  審核系統
                 </Link>
                 <button onClick={() => signOut({ callbackUrl: '/' })} className="nav-link" style={{ color: "#e53e3e" }}>
                   登出
@@ -130,13 +134,16 @@ export default function Navbar() {
               {link.label}
             </a>
           ))}
-          
-          {/*  手機版：只有登入後才會顯示的按鈕 */}
+
+          {/* 手機版：登入後按鈕 */}
           {session && (
             <>
               <div style={{ height: "1px", background: "var(--color-border)", margin: "8px 0" }}></div>
               <Link href="/editor" className="drawer-link" onClick={closeDrawer} style={{ color: "var(--color-brand-dark)", fontWeight: "bold" }}>
-                 新增公告
+                ✨ 新增公告
+              </Link>
+              <Link href="/review" className="drawer-link" onClick={closeDrawer} style={{ color: "var(--color-secondary)", fontWeight: "bold" }}>
+                📋 審核系統
               </Link>
               <button onClick={() => { closeDrawer(); signOut({ callbackUrl: '/' }); }} className="drawer-link" style={{ color: "#e53e3e", textAlign: "left" }}>
                 登出
