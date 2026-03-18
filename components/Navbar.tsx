@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react"; // 引入 session 與登出功能
 
 export default function Navbar() {
+  const { data: session } = useSession(); // 抓取登入狀態
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeHash, setActiveHash] = useState("home");
@@ -42,12 +44,11 @@ export default function Navbar() {
     document.body.style.overflow = "";
   };
 
-  // 自訂跳轉邏輯，解決 Next.js 擋住 hash 跳轉的問題
   const navigateTo = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     if (typeof window !== "undefined" && window.location.pathname === "/") {
       e.preventDefault();
       window.history.pushState(null, "", `/#${id}`);
-      window.dispatchEvent(new Event("hashchange")); // 手動觸發首頁切換
+      window.dispatchEvent(new Event("hashchange"));
     }
     closeDrawer();
   };
@@ -83,6 +84,18 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
+            
+            {/*  只有登入後才會顯示的按鈕 */}
+            {session && (
+              <>
+                <Link href="/editor" className="nav-link" style={{ color: "var(--color-brand-dark)", fontWeight: "bold" }}>
+                  新增公告
+                </Link>
+                <button onClick={() => signOut({ callbackUrl: '/' })} className="nav-link" style={{ color: "#e53e3e" }}>
+                  登出
+                </button>
+              </>
+            )}
           </nav>
 
           <button
@@ -117,6 +130,19 @@ export default function Navbar() {
               {link.label}
             </a>
           ))}
+          
+          {/*  手機版：只有登入後才會顯示的按鈕 */}
+          {session && (
+            <>
+              <div style={{ height: "1px", background: "var(--color-border)", margin: "8px 0" }}></div>
+              <Link href="/editor" className="drawer-link" onClick={closeDrawer} style={{ color: "var(--color-brand-dark)", fontWeight: "bold" }}>
+                 新增公告
+              </Link>
+              <button onClick={() => { closeDrawer(); signOut({ callbackUrl: '/' }); }} className="drawer-link" style={{ color: "#e53e3e", textAlign: "left" }}>
+                登出
+              </button>
+            </>
+          )}
         </nav>
       </aside>
     </>
