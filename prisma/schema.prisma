@@ -21,6 +21,7 @@ model Post {
   coverImage  String?
   authorEmail String
   status      PostStatus @default(PENDING) // 新增狀態欄位，預設為待審核
+  rejectReason String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
