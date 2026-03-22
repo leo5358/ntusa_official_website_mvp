@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
+import { Resend } from "resend";
+import ApprovalNotificationEmail from "../../../../components/emails/ApprovalNotificationEmail";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// 統一在此處定義公關部信箱
+const PR_EMAILS = ["liyu.yang@ntusa.ntu.edu.tw", "admin@ntusa.ntu.edu.tw"];
 
 // DELETE 方法：刪除文章
 export async function DELETE(
@@ -9,20 +16,29 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // 1. 安全檢查：確認使用者有登入才能刪除
     const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    if (!session || !session.user || !session.user.email) {
       return NextResponse.json({ error: "未授權的請求" }, { status: 401 });
     }
-
-    // 2. 解構取得網址上的文章 ID
+    
     const { id } = await params;
+    
+    // [修正] 先尋找文章，確認是否存在
+    const post = await prisma.post.findUnique({ where: { id } });
+    if (!post) {
+      return NextResponse.json({ error: "找不到該文章" }, { status: 404 });
+    }
 
-    // 3. 透過 Prisma 刪除資料庫中的文章
-    await prisma.post.delete({
-      where: { id },
-    });
+    // [修正] 權限驗證：只有「原作者本人」或「公關部」可以刪除文章
+    const userEmail = session.user.email;
+    const isAuthor = post.authorEmail === userEmail;
+    const isPR = PR_EMAILS.includes(userEmail);
 
+    if (!isAuthor && !isPR) {
+      return NextResponse.json({ error: "權限不足，無法刪除此文章" }, { status: 403 });
+    }
+
+    await prisma.post.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     console.error("刪除文章失敗:", error);
@@ -30,39 +46,70 @@ export async function DELETE(
   }
 }
 
-// PATCH 方法：更新文章狀態
+// PATCH 方法：更新文章狀態 (審核) + 寄送 Email
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // 1. 安全檢查：確認使用者有登入
     const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    if (!session || !session.user || !session.user.email) {
       return NextResponse.json({ error: "未授權的請求" }, { status: 401 });
     }
 
-    // TODO: 未來這裡需要加上權限判斷，例如：
-    // if (session.user.role !== "reviewer") {
-    //   return NextResponse.json({ error: "權限不足，僅審核者可執行此操作" }, { status: 403 });
-    // }
+    // [修正] 嚴格驗證權限：必須是公關部信箱才能執行審核操作
+    const userEmail = session.user.email;
+    if (!PR_EMAILS.includes(userEmail)) {
+      return NextResponse.json({ error: "權限不足，僅限公關部執行審核操作" }, { status: 403 });
+    }
 
-    // 2. 解構取得網址上的文章 ID 與請求內容
     const { id } = await params;
     const body = await request.json();
-    const { status } = body;
+    const { status, rejectReason } = body;
 
-    // 3. 檢查傳入的狀態是否有效
     const validStatuses = ["DRAFT", "PENDING", "APPROVED", "REJECTED"];
     if (!status || !validStatuses.includes(status)) {
       return NextResponse.json({ error: "無效的狀態值" }, { status: 400 });
     }
 
-    // 4. 透過 Prisma 更新文章狀態
+    if (status === "REJECTED" && (!rejectReason || rejectReason.trim() === "")) {
+      return NextResponse.json({ error: "退回文章必須提供原因" }, { status: 400 });
+    }
+
+    const post = await prisma.post.findUnique({ where: { id } });
+    if (!post) {
+      return NextResponse.json({ error: "找不到文章" }, { status: 404 });
+    }
+
     const updatedPost = await prisma.post.update({
       where: { id },
-      data: { status },
+      data: { 
+        status,
+        rejectReason: status === "REJECTED" ? rejectReason : null 
+      },
     });
+
+    // 寄信邏輯
+    if (status === "APPROVED" || status === "REJECTED") {
+      try {
+        const actionName = status === "APPROVED" ? "核准" : "退回";
+        
+        await resend.emails.send({
+          from: "NTUSA Website<noreply@notify.ntusa.ntu.edu.tw>",
+          to: [post.authorEmail], 
+          subject: `【文章審核通知】您的文章已${actionName}`,
+          react: ApprovalNotificationEmail({
+            postTitle: post.title,
+            status: status as "APPROVED" | "REJECTED",
+            rejectReason: status === "REJECTED" ? rejectReason : null
+          }) as React.ReactElement,
+        });
+        
+        console.log(`成功發送審核通知信至 ${post.authorEmail}`);
+      } catch (emailError) {
+        console.error("發送 Resend Email 失敗:", emailError);
+      }
+    }
 
     return NextResponse.json(updatedPost, { status: 200 });
   } catch (error) {
