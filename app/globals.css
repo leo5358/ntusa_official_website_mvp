@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../components/**/*.tsx";
 @plugin "@tailwindcss/typography";
 
 @layer base {
@@ -7,7 +8,8 @@
   h3, .title { font-size: 16px; font-weight: 600; line-height: 1.5; }
   p, .body { font-size: 16px; font-weight: 400; }
   a { text-decoration: none; color: inherit; }
-  button { background: none; border: none; cursor: pointer; padding: 0; }
+  img { display: block; max-width: 100%; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; padding: 0; }
 }
 
 .tiptap p.is-editor-empty:first-child::before {
@@ -56,10 +58,6 @@ body {
   background: var(--color-surface);
   -webkit-font-smoothing: antialiased;
 }
-
-a { text-decoration: none; color: inherit; }
-img { display: block; max-width: 100%; }
-button { font-family: inherit; cursor: pointer; border: none; background: none; }
 
 /* ── Typography ── */
 h1, .h1 { font-size: 32px; font-weight: 700; line-height: 1.25; }

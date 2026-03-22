@@ -42,14 +42,14 @@ export default function ReviewButtons({ postId }: { postId: string }) {
       <button
         onClick={() => handleUpdateStatus("APPROVED")}
         disabled={isLoading}
-        className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
+        className="btn bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 border-none"
       >
         {isLoading ? "處理中..." : "核准 (Approve)"}
       </button>
       <button
         onClick={() => handleUpdateStatus("REJECTED")}
         disabled={isLoading}
-        className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
+        className="btn bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 border-none"
       >
         {isLoading ? "處理中..." : "退回 (Reject)"}
       </button>
