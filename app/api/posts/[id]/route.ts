@@ -7,17 +7,37 @@ import ApprovalNotificationEmail from "../../../../components/emails/ApprovalNot
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// DELETE 方法：刪除文章 (維持不變)
+// 統一在此處定義公關部信箱
+const PR_EMAILS = ["liyu.yang@ntusa.ntu.edu.tw", "admin@ntusa.ntu.edu.tw"];
+
+// DELETE 方法：刪除文章
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    if (!session || !session.user || !session.user.email) {
       return NextResponse.json({ error: "未授權的請求" }, { status: 401 });
     }
+    
     const { id } = await params;
+    
+    // [修正] 先尋找文章，確認是否存在
+    const post = await prisma.post.findUnique({ where: { id } });
+    if (!post) {
+      return NextResponse.json({ error: "找不到該文章" }, { status: 404 });
+    }
+
+    // [修正] 權限驗證：只有「原作者本人」或「公關部」可以刪除文章
+    const userEmail = session.user.email;
+    const isAuthor = post.authorEmail === userEmail;
+    const isPR = PR_EMAILS.includes(userEmail);
+
+    if (!isAuthor && !isPR) {
+      return NextResponse.json({ error: "權限不足，無法刪除此文章" }, { status: 403 });
+    }
+
     await prisma.post.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
@@ -26,15 +46,21 @@ export async function DELETE(
   }
 }
 
-// PATCH 方法：更新文章狀態 + 寄送 Email
+// PATCH 方法：更新文章狀態 (審核) + 寄送 Email
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    if (!session || !session.user || !session.user.email) {
       return NextResponse.json({ error: "未授權的請求" }, { status: 401 });
+    }
+
+    // [修正] 嚴格驗證權限：必須是公關部信箱才能執行審核操作
+    const userEmail = session.user.email;
+    if (!PR_EMAILS.includes(userEmail)) {
+      return NextResponse.json({ error: "權限不足，僅限公關部執行審核操作" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -63,16 +89,15 @@ export async function PATCH(
       },
     });
 
-    // 👇 2. 寄信邏輯：改用 React 模板
+    // 寄信邏輯
     if (status === "APPROVED" || status === "REJECTED") {
       try {
         const actionName = status === "APPROVED" ? "核准" : "退回";
         
         await resend.emails.send({
-          from: "NTUSA Website<noreply@notify.ntusa.ntu.edu.tw>", // ⚠️ 記得改成您驗證過的網域
+          from: "NTUSA Website<noreply@notify.ntusa.ntu.edu.tw>",
           to: [post.authorEmail], 
           subject: `【文章審核通知】您的文章已${actionName}`,
-          // 👇 使用 react 屬性，並將資料傳入元件
           react: ApprovalNotificationEmail({
             postTitle: post.title,
             status: status as "APPROVED" | "REJECTED",
