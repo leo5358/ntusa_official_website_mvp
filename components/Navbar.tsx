@@ -2,18 +2,36 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { tabFromHashFragment } from "@/lib/home-active-tab";
+
+type NavHashItem = { kind: "hash"; id: string; label: string };
+type NavRouteItem = { kind: "route"; href: string; label: string };
+type NavItem = NavHashItem | NavRouteItem;
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeHash, setActiveHash] = useState("home");
 
+  const openDrawer = () => {
+    setIsDrawerOpen(true);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeDrawer = () => {
+    setIsDrawerOpen(false);
+    document.body.style.overflow = "";
+  };
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 8);
     const handleHash = () => {
-      setActiveHash(window.location.hash.replace("#", "") || "home");
+      setActiveHash(tabFromHashFragment(window.location.hash));
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -26,6 +44,11 @@ export default function Navbar() {
     };
   }, []);
 
+  // Client navigations (e.g. router.push("/#about") from /campus-tools) often skip the native hashchange event.
+  useEffect(() => {
+    setActiveHash(tabFromHashFragment(window.location.hash));
+  }, [pathname]);
+
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeDrawer();
@@ -34,32 +57,30 @@ export default function Navbar() {
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
 
-  const openDrawer = () => {
-    setIsDrawerOpen(true);
-    document.body.style.overflow = "hidden";
-  };
-
-  const closeDrawer = () => {
-    setIsDrawerOpen(false);
-    document.body.style.overflow = "";
-  };
-
   const navigateTo = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-    if (typeof window !== "undefined" && window.location.pathname === "/") {
-      e.preventDefault();
+    e.preventDefault();
+    closeDrawer();
+    if (pathname === "/") {
       window.history.pushState(null, "", `/#${id}`);
       window.dispatchEvent(new Event("hashchange"));
+    } else {
+      router.push(`/#${id}`);
     }
-    closeDrawer();
   };
 
-  const navLinks = [
-    { id: "home", label: "首頁" },
-    { id: "about", label: "關於我們" },
-    { id: "rights", label: "學權公告" },
-    { id: "forms", label: "表單連結" },
-    { id: "data", label: "公開資料" },
+  const navItems: NavItem[] = [
+    { kind: "hash", id: "home", label: "首頁" },
+    { kind: "hash", id: "about", label: "關於我們" },
+    { kind: "hash", id: "rights", label: "學權公告" },
+    { kind: "hash", id: "forms", label: "表單連結" },
+    { kind: "hash", id: "data", label: "公開資料" },
+    { kind: "route", href: "/campus-tools", label: "校園工具" },
   ];
+
+  const isNavActive = (item: NavItem) => {
+    if (item.kind === "route") return pathname === item.href;
+    return pathname === "/" && activeHash === item.id;
+  };
 
   return (
     <>
@@ -74,16 +95,26 @@ export default function Navbar() {
           </Link>
 
           <nav className="nav-links">
-            {navLinks.map((link) => (
-              <a
-                key={link.id}
-                href={`/#${link.id}`}
-                onClick={(e) => navigateTo(e, link.id)}
-                className={`nav-link ${activeHash === link.id ? "active" : ""}`}
-              >
-                {link.label}
-              </a>
-            ))}
+            {navItems.map((item) =>
+              item.kind === "route" ? (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`nav-link ${isNavActive(item) ? "active" : ""}`}
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <a
+                  key={item.id}
+                  href={`/#${item.id}`}
+                  onClick={(e) => navigateTo(e, item.id)}
+                  className={`nav-link ${isNavActive(item) ? "active" : ""}`}
+                >
+                  {item.label}
+                </a>
+              ),
+            )}
 
             {/* 登入後才會顯示的按鈕 */}
             {session && (
@@ -124,16 +155,27 @@ export default function Navbar() {
           </div>
         </div>
         <nav className="drawer-nav">
-          {navLinks.map((link) => (
-            <a
-              key={link.id}
-              href={`/#${link.id}`}
-              onClick={(e) => navigateTo(e, link.id)}
-              className={`drawer-link ${activeHash === link.id ? "active" : ""}`}
-            >
-              {link.label}
-            </a>
-          ))}
+          {navItems.map((item) =>
+            item.kind === "route" ? (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={closeDrawer}
+                className={`drawer-link ${isNavActive(item) ? "active" : ""}`}
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <a
+                key={item.id}
+                href={`/#${item.id}`}
+                onClick={(e) => navigateTo(e, item.id)}
+                className={`drawer-link ${isNavActive(item) ? "active" : ""}`}
+              >
+                {item.label}
+              </a>
+            ),
+          )}
 
           {/* 手機版：登入後按鈕 */}
           {session && (

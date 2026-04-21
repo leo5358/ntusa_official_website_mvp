@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import Link from "next/link";
+import { tabFromHashFragment } from "@/lib/home-active-tab";
 
 type PostType = {
   id: string;
@@ -15,20 +16,22 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
   const [activeTab, setActiveTab] = useState("home");
   const [dataTab, setDataTab] = useState("minutes");
 
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace("#", "") || "home";
-      const validPages = ["home", "about", "rights", "forms", "data"];
-      if (validPages.includes(hash)) {
-        setActiveTab(hash);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    };
-    
-    window.addEventListener("hashchange", handleHashChange);
-    handleHashChange(); 
-    return () => window.removeEventListener("hashchange", handleHashChange);
+  const applyHashToTab = useCallback((scrollBehavior: ScrollBehavior = "smooth") => {
+    const tab = tabFromHashFragment(window.location.hash);
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, behavior: scrollBehavior });
   }, []);
+
+  // Apply hash before paint so navigations from other routes (e.g. /campus-tools) do not flash the home hero.
+  useLayoutEffect(() => {
+    applyHashToTab("auto");
+  }, [applyHashToTab]);
+
+  useEffect(() => {
+    const handleHashChange = () => applyHashToTab("smooth");
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, [applyHashToTab]);
 
   useEffect(() => {
     const observerOptions = { threshold: 0.12, rootMargin: "0px 0px -40px 0px" };
@@ -69,13 +72,28 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
           <div className="hero-content fade-up-target">
             <h1 className="hero-title">臺大學生會</h1>
             <p className="hero-desc">代表每一位臺大學生，守護學生權益、促進校園民主。</p>
-            <a href="/#rights" onClick={(e) => navigateTo(e, "rights")} className="btn btn-primary">
+            <Link href="/#rights" onClick={(e) => navigateTo(e, "rights")} className="btn btn-primary">
               查看最新學權公告
-            </a>
+            </Link>
           </div>
           <div className="hero-scroll-hint">
             <span>向下捲動</span>
             <div className="scroll-arrow"></div>
+          </div>
+        </div>
+
+        <div className="home-tools-cta fade-up-target">
+          <div className="home-tools-cta-inner">
+            <div>
+              <div className="section-tag">Digital</div>
+              <h2 className="home-tools-cta-title">學生打造的校園服務</h2>
+              <p className="home-tools-cta-desc">
+                同學們開發的應用與工具，讓課業與生活更順手——不必是工程背景也能善用。
+              </p>
+            </div>
+            <Link href="/campus-tools" className="btn btn-primary">
+              探索校園工具
+            </Link>
           </div>
         </div>
 
@@ -112,9 +130,9 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
           </div>
           
           <div className="section-footer fade-up-target">
-            <a href="/#rights" onClick={(e) => navigateTo(e, "rights")} className="btn btn-outline">
+            <Link href="/#rights" onClick={(e) => navigateTo(e, "rights")} className="btn btn-outline">
               查看所有公告 →
-            </a>
+            </Link>
           </div>
         </div>
       </section>
