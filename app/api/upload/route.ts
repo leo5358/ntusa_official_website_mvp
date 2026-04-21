@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../lib/auth";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+
+// 初始化 R2 客戶端
+const s3Client = new S3Client({
+  region: "auto",
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+});
 
 export async function POST(request: Request) {
   try {
@@ -9,7 +20,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "未授權的請求" }, { status: 401 });
     }
 
-    // 1. 接收前端傳來的 FormData
     const formData = await request.formData();
     const file = formData.get("image") as File;
     
@@ -17,28 +27,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "沒有收到檔案" }, { status: 400 });
     }
 
-    // 2. 準備轉發給 ImgBB 的資料
-    const imgbbFormData = new FormData();
-    imgbbFormData.append("image", file);
-    imgbbFormData.append("key", process.env.IMGBB_API_KEY as string);
+    // 將 File 轉換為 Buffer 以供 SDK 使用
+    const buffer = Buffer.from(await file.arrayBuffer());
+    // 產生唯一的檔案名稱
+    const fileExtension = file.type.split("/")[1] || "webp";
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExtension}`;
 
-    // 3. 呼叫 ImgBB API
-    const imgbbRes = await fetch("https://api.imgbb.com/1/upload", {
-      method: "POST",
-      body: imgbbFormData,
-    });
-
-    const data = await imgbbRes.json();
+    // 3. 呼叫 R2 S3 API 上傳
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: fileName,
+        Body: buffer,
+        ContentType: file.type,
+      })
+    );
 
     // 4. 回傳結果
-    if (data.success) {
-      return NextResponse.json({ url: data.data.url });
-    } else {
-      throw new Error(data.error?.message || "ImgBB 拒絕了上傳");
-    }
+    // 使用 .env 中定義的公開 URL 組合出圖片路徑
+    const publicUrl = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${fileName}`;
+    
+    return NextResponse.json({ url: publicUrl });
 
   } catch (error) {
-    console.error("上傳至 ImgBB 失敗:", error);
+    console.error("上傳至 R2 失敗:", error);
     return NextResponse.json({ error: "內部伺服器錯誤" }, { status: 500 });
   }
 }
