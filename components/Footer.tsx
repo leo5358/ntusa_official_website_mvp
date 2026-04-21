@@ -40,6 +40,7 @@ export default function Footer() {
           <Link href="/#home">首頁</Link>
           <Link href="/#about">關於我們</Link>
           <Link href="/#rights">學權公告</Link>
+          <Link href="/campus-tools">校園工具</Link>
           <Link href="/#forms">表單連結</Link>
           <Link href="/#data">公開資料</Link>
         </div>
