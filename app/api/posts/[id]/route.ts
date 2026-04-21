@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../../lib/auth";
@@ -39,6 +40,7 @@ export async function DELETE(
     }
 
     await prisma.post.delete({ where: { id } });
+    revalidatePath("/");
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     console.error("刪除文章失敗:", error);
@@ -111,6 +113,7 @@ export async function PATCH(
       }
     }
 
+    revalidatePath("/");
     return NextResponse.json(updatedPost, { status: 200 });
   } catch (error) {
     console.error("更新文章狀態失敗:", error);
