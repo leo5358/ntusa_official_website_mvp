@@ -1,28 +1,41 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 
 export default function Footer() {
   const router = useRouter();
+  const pathname = usePathname();
   const [clickCount, setClickCount] = useState(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 彩蛋連擊邏輯
   const handleSecretClick = () => {
     const newCount = clickCount + 1;
     setClickCount(newCount);
 
-    // 如果連續點擊 5 次，就跳轉到登入頁面
     if (newCount === 5) {
-      router.push("/api/auth/signin"); // 這裡對應 NextAuth 的登入路徑
-      setClickCount(0); // 重置計數
+      router.push("/api/auth/signin");
+      setClickCount(0);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      return;
     }
 
-    // 設定一個計時器，如果太久沒點下一下，就歸零（避免一般人不小心點到累積）
-    setTimeout(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
       setClickCount(0);
-    }, 2000); 
+    }, 2000);
+  };
+
+  const handleHashNavigation = (e: React.MouseEvent<HTMLAnchorElement>, hashId: string) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.history.pushState(null, "", `/#${hashId}`);
+      window.dispatchEvent(new Event("hashchange"));
+    }
   };
 
   return (
@@ -37,12 +50,25 @@ export default function Footer() {
         </div>
         
         <div className="footer-links">
-          <Link href="/#home">首頁</Link>
-          <Link href="/#about">關於我們</Link>
-          <Link href="/#rights">學權公告</Link>
-          <Link href="/campus-tools">校園工具</Link>
-          <Link href="/#forms">表單連結</Link>
-          <Link href="/#data">公開資料</Link>
+          <Link href="/#home" onClick={(e) => handleHashNavigation(e, "home")}>
+            首頁
+          </Link>
+          <Link href="/#about" onClick={(e) => handleHashNavigation(e, "about")}>
+            關於我們
+          </Link>
+          <Link href="/#rights" onClick={(e) => handleHashNavigation(e, "rights")}>
+            學權公告
+          </Link>
+         <Link href="/#forms" onClick={(e) => handleHashNavigation(e, "forms")}>
+            表單連結
+          </Link>
+          <Link href="/#data" onClick={(e) => handleHashNavigation(e, "data")}>
+            公開資料
+          </Link>
+          <Link href="/campus-tools">
+            校園工具
+          </Link>
+
         </div>
 
         <div className="footer-socials">
@@ -58,7 +84,6 @@ export default function Footer() {
           </a>
         </div>
 
-        {/* 這裡就是設定彩蛋的地方 */}
         <div 
           className="footer-copy select-none cursor-default" 
           onClick={handleSecretClick}
