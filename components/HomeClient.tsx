@@ -58,8 +58,40 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
     window.dispatchEvent(new Event("hashchange"));
   };
 
-  const depts = ["會本部", "秘書處", "學術部", "公關部", "資訊部", "財務部", "國際部", "選舉罷免執行委員會"];
-
+  const deptsData = [
+    {
+       name: "會本部",
+       desc: "部門簡介尚未提供，敬請期待。"
+    },
+    {
+       name: "秘書處",
+       desc: "部門簡介尚未提供，敬請期待。"
+    },
+    {
+       name: "學術部",
+       desc: "部門簡介尚未提供，敬請期待。"
+    },
+    {
+        name: "公關部",
+        desc: "以提升學生福祉為出發點，致力於洽談特約廠商及多元跨界合作。除籌辦「期中期末補給站」等參與式活動，亦主導社群媒體素材發想與資訊傳遞，同時擔任對外聯絡窗口。期望能透過資源整合，將社會能量引進校園，提升學生福祉。"
+    },
+    {
+        name: "資訊部",
+        desc: "部門簡介尚未提供，敬請期待。"
+    },
+    {
+       name: "財務部",
+       desc: "負責預決算編列、會內請款報帳、校內核銷與控管會內整體財務狀況"
+    },
+    {
+       name: "國際部",
+       desc: "部門簡介尚未提供，敬請期待。"
+    },
+    {
+       name: "選舉罷免執行委員會",
+       desc: "部門簡介尚未提供，敬請期待。"
+    }
+  ];
   return (
     <>
       {/* ── PAGE: 首頁 ── */}
@@ -151,7 +183,7 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
           <div className="section-header fade-up-target">
             <div className="section-tag">關於臺大學生會</div>
             <h2 className="section-title">歷史沿革</h2>
-            <p className="section-sub">請不知道誰講古一下</p>
+            <p className="section-sub"></p>
           </div>
         </div>
 
@@ -162,11 +194,12 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
             <p className="section-sub">學生會由多個部門共同運作，各司其職，守護學生權益</p>
           </div>
 
-          <div className="dept-grid">
-            {depts.map((dept) => (
-              <div className="dept-card fade-up-target" key={dept}>
-                <h3 className="dept-name">{dept}</h3>
-                <p className="dept-desc dept-placeholder">部門簡介尚未提供，敬請期待。</p>
+        <div className="dept-grid">
+            {deptsData.map((dept) => (
+              <div className="dept-card fade-up-target" key={dept.name}>
+                <h3 className="dept-name">{dept.name}</h3>
+                {/* 移除了原本的 dept-placeholder 樣式類別，並換成真實的資料變數 */}
+                <p className="dept-desc">{dept.desc}</p>
               </div>
             ))}
           </div>
