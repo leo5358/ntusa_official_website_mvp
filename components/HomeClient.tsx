@@ -3,6 +3,7 @@
 import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import Link from "next/link";
 import { tabFromHashFragment } from "@/lib/home-active-tab";
+import AlternatingPostList from "./AlternatingPostList";
 
 type PostType = {
   id: string;
@@ -50,7 +51,8 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
       fadeObserver.observe(el);
     });
 
-    return () => fadeObserver.disconnect(); }, [activeTab]);
+    return () => fadeObserver.disconnect(); 
+  }, [activeTab]);
 
   const navigateTo = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
@@ -58,7 +60,40 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
     window.dispatchEvent(new Event("hashchange"));
   };
 
-  const depts = ["會本部", "秘書處", "學術部", "公關部", "資訊部", "財務部", "國際部", "選舉罷免執行委員會"];
+  const deptsData = [
+    {
+       name: "會本部",
+       desc: "部門簡介尚未提供，敬請期待。"
+    },
+    {
+       name: "秘書處",
+       desc: "部門簡介尚未提供，敬請期待。"
+    },
+    {
+       name: "學術部",
+       desc: "部門簡介尚未提供，敬請期待。"
+    },
+    {
+        name: "公關部",
+        desc: "以提升學生福祉為出發點，致力於洽談特約廠商及多元跨界合作。除籌辦「期中期末補給站」等參與式活動，亦主導社群媒體素材發想與資訊傳遞，同時擔任對外聯絡窗口。期望能透過資源整合，將社會能量引進校園，提升學生福祉。"
+    },
+    {
+        name: "資訊部",
+        desc: "資訊部是學生會與校園數位環境之間的橋樑，負責倡議改善同學日常使用的校園資訊系統，包含校內網路、印表機體驗等。此外，我們也會追蹤資訊安全與隱私權議題、處理陳情案件與突發事件通報。在技術開發上，我們維護財務報帳系統、學生會官網，同時負責會內各部門的資料整合與密碼管理基礎建設。"
+    },
+    {
+       name: "財務部",
+       desc: "負責預決算編列、會內請款報帳、校內核銷與控管會內整體財務狀況"
+    },
+    {
+       name: "國際部",
+       desc: "部門簡介尚未提供，敬請期待。"
+    },
+    {
+       name: "選舉罷免執行委員會",
+       desc: "部門簡介尚未提供，敬請期待。"
+    }
+  ];
 
   return (
     <>
@@ -151,7 +186,7 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
           <div className="section-header fade-up-target">
             <div className="section-tag">關於臺大學生會</div>
             <h2 className="section-title">歷史沿革</h2>
-            <p className="section-sub">請不知道誰講古一下</p>
+            <p className="section-sub"></p>
           </div>
         </div>
 
@@ -162,11 +197,11 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
             <p className="section-sub">學生會由多個部門共同運作，各司其職，守護學生權益</p>
           </div>
 
-          <div className="dept-grid">
-            {depts.map((dept) => (
-              <div className="dept-card fade-up-target" key={dept}>
-                <h3 className="dept-name">{dept}</h3>
-                <p className="dept-desc dept-placeholder">部門簡介尚未提供，敬請期待。</p>
+        <div className="dept-grid">
+            {deptsData.map((dept) => (
+              <div className="dept-card fade-up-target" key={dept.name}>
+                <h3 className="dept-name">{dept.name}</h3>
+                <p className="dept-desc">{dept.desc}</p>
               </div>
             ))}
           </div>
@@ -184,11 +219,9 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
         </div>
 
         <div className="section-wrap">
-          <div className="rights-placeholder-box fade-up-target">
-            <div className="placeholder-icon">📢</div>
-            <h3>學權公告系統</h3>
-            <p>此區塊將與後端發文系統進行連動，<br/>公告內容將由後端自動帶入顯示。</p>
-            <div className="placeholder-badge">後端連動預留區</div>
+          {/* 原本的 placeholder 已替換為 AlternatingPostList */}
+          <div className="fade-up-target">
+            <AlternatingPostList posts={posts} />
           </div>
         </div>
       </section>
