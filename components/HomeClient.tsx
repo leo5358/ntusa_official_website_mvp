@@ -3,6 +3,7 @@
 import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import Link from "next/link";
 import { tabFromHashFragment } from "@/lib/home-active-tab";
+import AlternatingPostList from "./AlternatingPostList";
 
 type PostType = {
   id: string;
@@ -50,7 +51,8 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
       fadeObserver.observe(el);
     });
 
-    return () => fadeObserver.disconnect(); }, [activeTab]);
+    return () => fadeObserver.disconnect(); 
+  }, [activeTab]);
 
   const navigateTo = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
@@ -77,7 +79,7 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
     },
     {
         name: "資訊部",
-        desc: "部門簡介尚未提供，敬請期待。"
+        desc: "資訊部是學生會與校園數位環境之間的橋樑，負責倡議改善同學日常使用的校園資訊系統，包含校內網路、印表機體驗等。此外，我們也會追蹤資訊安全與隱私權議題、處理陳情案件與突發事件通報。在技術開發上，我們維護財務報帳系統、學生會官網，同時負責會內各部門的資料整合與密碼管理基礎建設。"
     },
     {
        name: "財務部",
@@ -92,6 +94,7 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
        desc: "部門簡介尚未提供，敬請期待。"
     }
   ];
+
   return (
     <>
       {/* ── PAGE: 首頁 ── */}
@@ -198,7 +201,6 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
             {deptsData.map((dept) => (
               <div className="dept-card fade-up-target" key={dept.name}>
                 <h3 className="dept-name">{dept.name}</h3>
-                {/* 移除了原本的 dept-placeholder 樣式類別，並換成真實的資料變數 */}
                 <p className="dept-desc">{dept.desc}</p>
               </div>
             ))}
@@ -217,11 +219,9 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
         </div>
 
         <div className="section-wrap">
-          <div className="rights-placeholder-box fade-up-target">
-            <div className="placeholder-icon">📢</div>
-            <h3>學權公告系統</h3>
-            <p>此區塊將與後端發文系統進行連動，<br/>公告內容將由後端自動帶入顯示。</p>
-            <div className="placeholder-badge">後端連動預留區</div>
+          {/* 原本的 placeholder 已替換為 AlternatingPostList */}
+          <div className="fade-up-target">
+            <AlternatingPostList posts={posts} />
           </div>
         </div>
       </section>
