@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 
@@ -42,7 +43,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <div className="logo-mark small">logo</div>
+          <Image src="/NTUSA_Logo_1.png" alt="臺大學生會" width={32} height={32} className="logo-mark small" />
           <div>
             <div className="footer-name">國立臺灣大學學生會</div>
             <div className="footer-name-en">NTU Student Association</div>
@@ -60,7 +61,7 @@ export default function Footer() {
             學權公告
           </Link>
          <Link href="/#forms" onClick={(e) => handleHashNavigation(e, "forms")}>
-            表單連結
+            相關連結
           </Link>
           <Link href="/#data" onClick={(e) => handleHashNavigation(e, "data")}>
             公開資料

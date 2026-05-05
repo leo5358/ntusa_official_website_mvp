@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -72,9 +73,8 @@ export default function Navbar() {
     { kind: "hash", id: "home", label: "首頁" },
     { kind: "hash", id: "about", label: "關於我們" },
     { kind: "hash", id: "rights", label: "學權公告" },
-    { kind: "hash", id: "forms", label: "表單連結" },
+    { kind: "hash", id: "forms", label: "相關連結" },
     { kind: "hash", id: "data", label: "公開資料" },
-    { kind: "route", href: "/campus-tools", label: "校園工具" },
   ];
 
   const isNavActive = (item: NavItem) => {
@@ -87,7 +87,7 @@ export default function Navbar() {
       <header className={`navbar ${scrolled ? "scrolled" : ""}`} id="navbar">
         <div className="nav-inner">
           <Link href="/#home" className="nav-logo" onClick={(e) => navigateTo(e, "home")}>
-            <div className="logo-mark">logo</div>
+            <Image src="/NTUSA_Logo_1.png" alt="臺大學生會" width={40} height={40} className="logo-mark" />
             <div className="logo-text">
               <span className="logo-title">臺大學生會</span>
               <span className="logo-sub">NTU Student Association</span>
@@ -148,7 +148,7 @@ export default function Navbar() {
       <aside className={`drawer ${isDrawerOpen ? "open" : ""}`} id="drawer">
         <button className="drawer-close" onClick={closeDrawer} aria-label="關閉選單">✕</button>
         <div className="drawer-logo">
-          <div className="logo-mark"></div>
+          <Image src="/NTUSA_Logo_1.png" alt="臺大學生會" width={40} height={40} className="logo-mark" />
           <div className="logo-text">
             <span className="logo-title">臺大學生會</span>
             <span className="logo-sub">NTU Student Association</span>
