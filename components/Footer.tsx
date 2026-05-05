@@ -66,10 +66,6 @@ export default function Footer() {
           <Link href="/#data" onClick={(e) => handleHashNavigation(e, "data")}>
             公開資料
           </Link>
-          <Link href="/campus-tools">
-            校園工具
-          </Link>
-
         </div>
 
         <div className="footer-socials">
