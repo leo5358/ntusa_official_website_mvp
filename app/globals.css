@@ -146,15 +146,11 @@ p, .body { font-size: 16px; font-weight: 400; }
 }
 .logo-mark {
   width: 40px; height: 40px;
-  background: var(--color-secondary);
-  color: var(--color-text-invert);
   border-radius: var(--radius-sm);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700;
-  letter-spacing: .05em;
   flex-shrink: 0;
+  object-fit: contain;
 }
-.logo-mark.small { width: 32px; height: 32px; font-size: 11px; }
+.logo-mark.small { width: 32px; height: 32px; }
 
 .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
 .logo-title { font-size: 16px; font-weight: 700; color: var(--color-secondary); }
@@ -481,6 +477,22 @@ main { margin-top: var(--nav-h); min-height: calc(100vh - var(--nav-h)); }
 }
 
 /* =====================================================
+   ABOUT — HISTORY BODY
+   ===================================================== */
+.about-body {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.about-body p {
+  color: var(--color-text-secondary);
+  line-height: 1.9;
+  font-size: 1rem;
+}
+
+/* =====================================================
    ABOUT — DEPT GRID
    ===================================================== */
 .dept-grid {
@@ -541,41 +553,58 @@ main { margin-top: var(--nav-h); min-height: calc(100vh - var(--nav-h)); }
 }
 
 /* =====================================================
-   FORMS GRID
+   LINKS GRID
    ===================================================== */
-.forms-grid {
+.links-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
 
-.form-card {
+.link-card {
   background: var(--color-card-bg);
   border-radius: var(--radius-md);
-  padding: 28px;
+  padding: 24px 28px;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
-  display: flex; flex-direction: column; gap: 12px;
+  display: flex; align-items: center; gap: 20px;
+  text-decoration: none;
+  color: inherit;
   transition: transform var(--transition), box-shadow var(--transition);
 }
-.form-card:not(.add-card):hover {
-  transform: translateY(-4px);
+.link-card:not(.link-card-placeholder):hover {
+  transform: translateY(-3px);
   box-shadow: var(--shadow-md);
 }
+.link-card-placeholder {
+  opacity: 0.5;
+  cursor: default;
+}
 
-.form-card-header { display: flex; align-items: center; gap: 10px; }
-.form-icon { font-size: 24px; }
-.form-tag {
+.link-card-icon {
+  width: 52px; height: 52px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.line-icon {
+  background: #06C755;
+  color: #fff;
+}
+
+.link-card-body { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.link-card-tag {
   font-size: 11px; font-weight: 700;
   letter-spacing: .08em;
-  padding: 3px 10px;
+  padding: 2px 8px;
   border-radius: 100px;
   background: var(--color-brand-light);
   color: var(--color-brand-dark);
+  align-self: flex-start;
 }
-.form-title { font-size: 16px; font-weight: 700; color: var(--color-secondary); }
-.form-desc { font-size: 14px; color: var(--color-text-secondary); flex: 1; }
-.form-placeholder { font-style: italic; color: #bbb; }
+.link-card-title { font-size: 16px; font-weight: 700; color: var(--color-secondary); margin-top: 4px; }
+.link-card-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; }
+.link-card-arrow { font-size: 20px; color: var(--color-brand); flex-shrink: 0; }
 
 .add-card {
   border-style: dashed;
@@ -956,8 +985,8 @@ main { margin-top: var(--nav-h); min-height: calc(100vh - var(--nav-h)); }
   .dept-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
   .dept-card { padding: 20px 16px; }
 
-  /* Forms */
-  .forms-grid { grid-template-columns: 1fr; }
+  /* Links */
+  .links-grid { grid-template-columns: 1fr; }
 
   /* Page hero */
   .page-hero-mini { padding: 56px 20px 48px; }
