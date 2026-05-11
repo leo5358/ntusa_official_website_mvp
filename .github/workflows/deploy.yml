@@ -1,0 +1,34 @@
+name: Deployment
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build and Deploy
+        run: |
+          cd /home/flavian/ntusa_official_website_mvp
+          git pull origin main
+          npm run build
+          pm2 restart ntusa-website
+
+      - name: Notify Discord on Success
+        if: success() # 只有前面的步驟都成功才會執行這個通知
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{"content": "台大學生會官網部署成功！"}' \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Notify Discord on Failure
+        if: failure() # 如果前面的部署步驟失敗，就會觸發這個通知
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{"content": "警告：台大學生會官網部署失敗，請檢查 GitHub Actions Log。"}' \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
