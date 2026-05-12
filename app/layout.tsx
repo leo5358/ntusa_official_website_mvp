@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import "./globals.css";
 import Providers from "../components/Providers";
 import Navbar from "../components/Navbar";
@@ -7,30 +9,37 @@ import Footer from "../components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "臺大學生會官網",
-  description: "國立臺灣大學學生會官方網站發文系統",
-  icons: {
-    icon: "/icon.png",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return {
+    title: t("siteTitle"),
+    description: t("siteDescription"),
+    icons: {
+      icon: "/icon.png",
+    },
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="zh-TW">
+    <html lang={locale}>
       <body className={inter.className}>
-        <Providers>
-          <Navbar />
-          {/* 拿掉多餘的 Tailwind padding，套用你寫的 CSS 佈局 */}
-          <main>
-            {children}
-          </main>
-          <Footer />
-        </Providers>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Providers>
+            <Navbar />
+            <main>
+              {children}
+            </main>
+            <Footer />
+          </Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
