@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import {
   campusTools,
   getFeaturedTool,
@@ -6,11 +7,13 @@ import {
 } from "@/lib/campus-tools";
 import CampusToolsPageClient from "@/components/campus-tools/CampusToolsPageClient";
 
-export const metadata: Metadata = {
-  title: "校園工具｜臺大學生會",
-  description:
-    "由同學開發的應用與工具，讓校園生活更順手。臺大學生會彙整學生打造的數位服務。",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return {
+    title: t("campusToolsTitle"),
+    description: t("campusToolsDescription"),
+  };
+}
 
 export default function CampusToolsPage() {
   const featured = getFeaturedTool(campusTools);

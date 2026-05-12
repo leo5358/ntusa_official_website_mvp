@@ -3,10 +3,13 @@
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function Footer() {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("footer");
+  const tNav = useTranslations("nav");
 
   const handleLogoClick = () => {
     router.push("/api/auth/signin");
@@ -27,35 +30,35 @@ export default function Footer() {
           <button
             type="button"
             onClick={handleLogoClick}
-            aria-label="管理員登入"
+            aria-label={t("adminSignInAriaLabel")}
             className="footer-logo-button"
           >
-            <Image src="/NTUSA_Logo_1.png" alt="臺大學生會" width={32} height={32} className="logo-mark small" />
+            <Image src="/NTUSA_Logo_1.png" alt={t("orgName")} width={32} height={32} className="logo-mark small" />
           </button>
           <div>
-            <div className="footer-name">國立臺灣大學學生會</div>
-            <div className="footer-name-en">NTU Student Association</div>
+            <div className="footer-name">{t("orgName")}</div>
+            <div className="footer-name-en">{t("orgNameEn")}</div>
             <a href="mailto:infor@ntusa.ntu.edu.tw" className="footer-contact">
               infor@ntusa.ntu.edu.tw
             </a>
           </div>
         </div>
-        
+
         <div className="footer-links">
           <Link href="/#home" onClick={(e) => handleHashNavigation(e, "home")}>
-            首頁
+            {tNav("home")}
           </Link>
           <Link href="/#about" onClick={(e) => handleHashNavigation(e, "about")}>
-            關於我們
+            {tNav("about")}
           </Link>
           <Link href="/#rights" onClick={(e) => handleHashNavigation(e, "rights")}>
-            學權公告
+            {tNav("rights")}
           </Link>
          <Link href="/#forms" onClick={(e) => handleHashNavigation(e, "forms")}>
-            相關連結
+            {tNav("forms")}
           </Link>
           <Link href="/#data" onClick={(e) => handleHashNavigation(e, "data")}>
-            公開資料
+            {tNav("data")}
           </Link>
         </div>
 
@@ -73,7 +76,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-copy">
-          © 2026 國立臺灣大學學生會資訊部
+          {t("copyright")}
         </div>
       </div>
     </footer>

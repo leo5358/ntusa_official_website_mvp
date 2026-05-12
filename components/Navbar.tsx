@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { tabFromHashFragment } from "@/lib/home-active-tab";
 
 type NavHashItem = { kind: "hash"; id: string; label: string };
@@ -15,6 +16,8 @@ export default function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations("nav");
+  const tFooter = useTranslations("footer");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeHash, setActiveHash] = useState("home");
@@ -70,11 +73,11 @@ export default function Navbar() {
   };
 
   const navItems: NavItem[] = [
-    { kind: "hash", id: "home", label: "首頁" },
-    { kind: "hash", id: "about", label: "關於我們" },
-    { kind: "hash", id: "rights", label: "學權公告" },
-    { kind: "hash", id: "forms", label: "相關連結" },
-    { kind: "hash", id: "data", label: "公開資料" },
+    { kind: "hash", id: "home", label: t("home") },
+    { kind: "hash", id: "about", label: t("about") },
+    { kind: "hash", id: "rights", label: t("rights") },
+    { kind: "hash", id: "forms", label: t("forms") },
+    { kind: "hash", id: "data", label: t("data") },
   ];
 
   const isNavActive = (item: NavItem) => {
@@ -87,10 +90,10 @@ export default function Navbar() {
       <header className={`navbar ${scrolled ? "scrolled" : ""}`} id="navbar">
         <div className="nav-inner">
           <Link href="/#home" className="nav-logo" onClick={(e) => navigateTo(e, "home")}>
-            <Image src="/NTUSA_Logo_1.png" alt="臺大學生會" width={40} height={40} className="logo-mark" />
+            <Image src="/NTUSA_Logo_1.png" alt={tFooter("orgName")} width={40} height={40} className="logo-mark" />
             <div className="logo-text">
-              <span className="logo-title">臺大學生會</span>
-              <span className="logo-sub">NTU Student Association</span>
+              <span className="logo-title">{tFooter("orgName")}</span>
+              <span className="logo-sub">{tFooter("orgNameEn")}</span>
             </div>
           </Link>
 
@@ -121,13 +124,13 @@ export default function Navbar() {
               <>
                 <div style={{ width: "1px", height: "20px", background: "var(--color-border)", margin: "0 8px" }}></div>
                 <Link href="/editor" className="nav-link" style={{ color: "var(--color-brand-dark)", fontWeight: "bold" }}>
-                  新增公告
+                  {t("newPost")}
                 </Link>
                 <Link href="/review" className="nav-link" style={{ color: "var(--color-secondary)", fontWeight: "bold" }}>
-                  審核系統
+                  {t("review")}
                 </Link>
                 <button onClick={() => signOut({ callbackUrl: '/' })} className="nav-link" style={{ color: "#e53e3e" }}>
-                  登出
+                  {t("signOut")}
                 </button>
               </>
             )}
@@ -136,7 +139,7 @@ export default function Navbar() {
           <button
             className={`hamburger ${isDrawerOpen ? "open" : ""}`}
             onClick={isDrawerOpen ? closeDrawer : openDrawer}
-            aria-label="開啟選單"
+            aria-label={t("openMenu")}
           >
             <span></span><span></span><span></span>
           </button>
@@ -146,12 +149,12 @@ export default function Navbar() {
       {/* 手機版側邊選單 */}
       <div className={`drawer-overlay ${isDrawerOpen ? "open" : ""}`} onClick={closeDrawer}></div>
       <aside className={`drawer ${isDrawerOpen ? "open" : ""}`} id="drawer">
-        <button className="drawer-close" onClick={closeDrawer} aria-label="關閉選單">✕</button>
+        <button className="drawer-close" onClick={closeDrawer} aria-label={t("closeMenu")}>✕</button>
         <div className="drawer-logo">
-          <Image src="/NTUSA_Logo_1.png" alt="臺大學生會" width={40} height={40} className="logo-mark" />
+          <Image src="/NTUSA_Logo_1.png" alt={tFooter("orgName")} width={40} height={40} className="logo-mark" />
           <div className="logo-text">
-            <span className="logo-title">臺大學生會</span>
-            <span className="logo-sub">NTU Student Association</span>
+            <span className="logo-title">{tFooter("orgName")}</span>
+            <span className="logo-sub">{tFooter("orgNameEn")}</span>
           </div>
         </div>
         <nav className="drawer-nav">
@@ -182,13 +185,13 @@ export default function Navbar() {
             <>
               <div style={{ height: "1px", background: "var(--color-border)", margin: "8px 0" }}></div>
               <Link href="/editor" className="drawer-link" onClick={closeDrawer} style={{ color: "var(--color-brand-dark)", fontWeight: "bold" }}>
-                ✨ 新增公告
+                ✨ {t("newPost")}
               </Link>
               <Link href="/review" className="drawer-link" onClick={closeDrawer} style={{ color: "var(--color-secondary)", fontWeight: "bold" }}>
-                📋 審核系統
+                📋 {t("review")}
               </Link>
               <button onClick={() => { closeDrawer(); signOut({ callbackUrl: '/' }); }} className="drawer-link" style={{ color: "#e53e3e", textAlign: "left" }}>
-                登出
+                {t("signOut")}
               </button>
             </>
           )}

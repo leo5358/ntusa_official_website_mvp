@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Script from "next/script";
+import { useTranslations } from "next-intl";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // THREE is loaded from a CDN at runtime, so it has no typings here.
@@ -285,6 +286,7 @@ export default function HomeHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
   const startedRef = useRef(false);
+  const t = useTranslations("home.hero");
 
   useEffect(() => {
     let pollId = 0;
@@ -321,16 +323,16 @@ export default function HomeHero() {
       <div className="hero">
         <canvas ref={canvasRef} id="heroCanvas" />
         <div className="hero-content fade-up-target">
-          <p className="hero-eyebrow">NTU Student Association</p>
-          <h1 className="hero-title">臺大學生會</h1>
+          <p className="hero-eyebrow">{t("eyebrow")}</p>
+          <h1 className="hero-title">{t("title")}</h1>
           <p className="hero-desc">
-            代表每一位臺大學生
+            {t("descLine1")}
             <br />
-            守護學生權益・促進校園民主
+            {t("descLine2")}
           </p>
         </div>
         <div className="hero-scroll-hint">
-          <span>向下捲動</span>
+          <span>{t("scrollHint")}</span>
           <div className="scroll-arrow"></div>
         </div>
       </div>

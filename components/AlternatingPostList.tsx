@@ -1,5 +1,8 @@
+"use client";
+
 import React from 'react';
 import Link from 'next/link';
+import { useTranslations } from "next-intl";
 
 type Post = {
   id: string;
@@ -10,8 +13,10 @@ type Post = {
 };
 
 export default function AlternatingPostList({ posts }: { posts: Post[] }) {
+  const t = useTranslations("home.rights");
+
   if (!posts || posts.length === 0) {
-    return <div className="text-center text-gray-500 py-8">目前尚無公告</div>;
+    return <div className="text-center text-gray-500 py-8">{t("alternatingEmpty")}</div>;
   }
 
   return (
@@ -37,7 +42,7 @@ export default function AlternatingPostList({ posts }: { posts: Post[] }) {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
-                  <span className="text-gray-400">尚無圖片</span>
+                  <span className="text-gray-400">{t("alternatingNoImage")}</span>
                 )}
               </div>
             </div>

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import DeleteButton from "../../../components/DeleteButton"; // 引入刪除按鈕元件
 
 export default async function PostPage({ 
@@ -25,6 +26,8 @@ export default async function PostPage({
 
   // 取得目前登入者的 Session (用於判斷權限)
   const session = await getServerSession(authOptions);
+
+  const t = await getTranslations("post");
 
   // 3. 安全性攔截邏輯：如果文章不是「已核准」狀態
   if (post.status !== "APPROVED") {
@@ -49,7 +52,7 @@ export default async function PostPage({
             </div>
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
-                <strong>注意：</strong> 這篇文章目前的狀態為 <span className="font-mono bg-yellow-100 px-1 rounded">{post.status}</span>，尚未對外公開。此頁面目前僅有內部人員可見。
+                <strong>{t("unpublishedNotice")}</strong> {t("unpublishedBody")} <span className="font-mono bg-yellow-100 px-1 rounded">{post.status}</span>{t("unpublishedBodyTail")}
               </p>
             </div>
           </div>
@@ -70,9 +73,9 @@ export default async function PostPage({
       
       {/* 文章資訊 */}
       <div className="flex items-center text-gray-500 text-sm mb-8 border-b pb-8">
-        <span className="mr-4">作者：{post.authorEmail}</span>
+        <span className="mr-4">{t("authorLabel")}{post.authorEmail}</span>
         <span>
-          發布時間：{new Date(post.createdAt).toLocaleDateString("zh-TW", { year: 'numeric', month: 'long', day: 'numeric' })}
+          {t("publishedLabel")}{new Date(post.createdAt).toLocaleDateString(t("dateLocale"), { year: 'numeric', month: 'long', day: 'numeric' })}
         </span>
       </div>
 
@@ -88,7 +91,7 @@ export default async function PostPage({
           <svg className="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          返回首頁
+          {t("backToHome")}
         </Link>
 
         {/* 只有「文章原作者」才看得到刪除按鈕 */}

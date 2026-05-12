@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function DeleteButton({ postId }: { postId: string }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+  const t = useTranslations("post");
 
   const handleDelete = async () => {
     // 加上防呆確認視窗，避免誤按
-    const confirmed = confirm("確定要刪除這篇文章嗎？此動作無法復原！");
+    const confirmed = confirm(t("deleteConfirm"));
     if (!confirmed) return;
 
     setIsDeleting(true);
@@ -19,14 +21,14 @@ export default function DeleteButton({ postId }: { postId: string }) {
       });
 
       if (res.ok) {
-        alert("文章已成功刪除！");
+        alert(t("deleteSuccess"));
         router.push("/"); // 刪除後導回首頁
         router.refresh(); // 強制首頁重新向資料庫抓取最新列表
       } else {
-        throw new Error("刪除失敗");
+        throw new Error(t("deleteFailedInternal"));
       }
     } catch (error) {
-      alert("發生錯誤，請稍後再試。");
+      alert(t("deleteError"));
       console.error(error);
       setIsDeleting(false);
     }
@@ -38,7 +40,7 @@ export default function DeleteButton({ postId }: { postId: string }) {
       disabled={isDeleting}
       className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 font-medium rounded-md transition-colors disabled:opacity-50"
     >
-      {isDeleting ? "刪除中..." : "刪除文章"}
+      {isDeleting ? t("deleteButtonLoading") : t("deleteButton")}
     </button>
   );
 }
