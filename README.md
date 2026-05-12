@@ -25,3 +25,10 @@ npx prisma db push
 ```bash
 npm run dev
 ```
+
+
+## deploy
+```
+npm run build
+pm2 restart ntusa-website
+```
