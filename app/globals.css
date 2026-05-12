@@ -324,6 +324,58 @@ p, .body { font-size: 16px; font-weight: 400; }
 .drawer-link:hover { background: var(--color-brand-light); color: var(--color-brand-dark); padding-left: 22px; }
 .drawer-link.active { background: var(--color-secondary); color: var(--color-text-invert); }
 
+.drawer-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 16px 0 8px;
+}
+
+/* =====================================================
+   LOCALE SWITCHER
+   ===================================================== */
+.locale-switcher {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 100px;
+  background: rgba(49, 54, 70, .06);
+  border: 1px solid var(--color-border);
+}
+.locale-switcher__option {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 4px 12px;
+  min-width: 36px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--color-text-secondary);
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), opacity var(--transition);
+}
+.locale-switcher__option:hover:not(.is-active):not(:disabled) {
+  color: var(--color-brand-dark);
+}
+.locale-switcher__option.is-active {
+  background: var(--color-secondary);
+  color: var(--color-text-invert);
+  cursor: default;
+}
+.locale-switcher__option:disabled:not(.is-active) {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.locale-switcher--desktop {
+  margin-left: 8px;
+}
+.locale-switcher--drawer {
+  align-self: center;
+  margin-top: 4px;
+}
+
 /* =====================================================
    PAGES
    ===================================================== */

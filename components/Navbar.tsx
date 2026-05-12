@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { tabFromHashFragment } from "@/lib/home-active-tab";
+import LocaleSwitcher from "./LocaleSwitcher";
 
 type NavHashItem = { kind: "hash"; id: string; label: string };
 type NavRouteItem = { kind: "route"; href: string; label: string };
@@ -134,6 +135,8 @@ export default function Navbar() {
                 </button>
               </>
             )}
+
+            <LocaleSwitcher variant="desktop" />
           </nav>
 
           <button
@@ -195,6 +198,9 @@ export default function Navbar() {
               </button>
             </>
           )}
+
+          <div className="drawer-divider" aria-hidden></div>
+          <LocaleSwitcher variant="drawer" onSwitch={closeDrawer} />
         </nav>
       </aside>
     </>
