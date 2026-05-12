@@ -17,14 +17,14 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
-      return NextResponse.json({ error: "未授權的請求" }, { status: 401 });
+      return NextResponse.json({ errorCode: "UNAUTHORIZED" }, { status: 401 });
     }
 
     const formData = await request.formData();
     const file = formData.get("image") as File;
-    
+
     if (!file) {
-      return NextResponse.json({ error: "沒有收到檔案" }, { status: 400 });
+      return NextResponse.json({ errorCode: "NO_FILE" }, { status: 400 });
     }
 
     // 將 File 轉換為 Buffer 以供 SDK 使用
@@ -51,6 +51,6 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error("上傳至 R2 失敗:", error);
-    return NextResponse.json({ error: "內部伺服器錯誤" }, { status: 500 });
+    return NextResponse.json({ errorCode: "INTERNAL_ERROR" }, { status: 500 });
   }
 }

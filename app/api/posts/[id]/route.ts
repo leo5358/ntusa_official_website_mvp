@@ -19,15 +19,15 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user || !session.user.email) {
-      return NextResponse.json({ error: "未授權的請求" }, { status: 401 });
+      return NextResponse.json({ errorCode: "UNAUTHORIZED" }, { status: 401 });
     }
-    
+
     const { id } = await params;
-    
+
     // [修正] 先尋找文章，確認是否存在
     const post = await prisma.post.findUnique({ where: { id } });
     if (!post) {
-      return NextResponse.json({ error: "找不到該文章" }, { status: 404 });
+      return NextResponse.json({ errorCode: "POST_NOT_FOUND" }, { status: 404 });
     }
 
     // [修正] 權限驗證：只有「原作者本人」或「公關部」可以刪除文章
@@ -36,7 +36,7 @@ export async function DELETE(
     const isPR = PR_EMAILS.includes(userEmail);
 
     if (!isAuthor && !isPR) {
-      return NextResponse.json({ error: "權限不足，無法刪除此文章" }, { status: 403 });
+      return NextResponse.json({ errorCode: "FORBIDDEN_DELETE" }, { status: 403 });
     }
 
     await prisma.post.delete({ where: { id } });
@@ -44,7 +44,7 @@ export async function DELETE(
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     console.error("刪除文章失敗:", error);
-    return NextResponse.json({ error: "內部伺服器錯誤" }, { status: 500 });
+    return NextResponse.json({ errorCode: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
 
@@ -56,13 +56,13 @@ export async function PATCH(
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user || !session.user.email) {
-      return NextResponse.json({ error: "未授權的請求" }, { status: 401 });
+      return NextResponse.json({ errorCode: "UNAUTHORIZED" }, { status: 401 });
     }
 
     // [修正] 嚴格驗證權限：必須是公關部信箱才能執行審核操作
     const userEmail = session.user.email;
     if (!PR_EMAILS.includes(userEmail)) {
-      return NextResponse.json({ error: "權限不足，僅限公關部執行審核操作" }, { status: 403 });
+      return NextResponse.json({ errorCode: "FORBIDDEN_REVIEW" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -71,16 +71,16 @@ export async function PATCH(
 
     const validStatuses = ["DRAFT", "PENDING", "APPROVED", "REJECTED"];
     if (!status || !validStatuses.includes(status)) {
-      return NextResponse.json({ error: "無效的狀態值" }, { status: 400 });
+      return NextResponse.json({ errorCode: "INVALID_STATUS" }, { status: 400 });
     }
 
     if (status === "REJECTED" && (!rejectReason || rejectReason.trim() === "")) {
-      return NextResponse.json({ error: "退回文章必須提供原因" }, { status: 400 });
+      return NextResponse.json({ errorCode: "REJECT_REASON_REQUIRED" }, { status: 400 });
     }
 
     const post = await prisma.post.findUnique({ where: { id } });
     if (!post) {
-      return NextResponse.json({ error: "找不到文章" }, { status: 404 });
+      return NextResponse.json({ errorCode: "POST_NOT_FOUND" }, { status: 404 });
     }
 
     const updatedPost = await prisma.post.update({
@@ -117,6 +117,6 @@ export async function PATCH(
     return NextResponse.json(updatedPost, { status: 200 });
   } catch (error) {
     console.error("更新文章狀態失敗:", error);
-    return NextResponse.json({ error: "內部伺服器錯誤" }, { status: 500 });
+    return NextResponse.json({ errorCode: "INTERNAL_ERROR" }, { status: 500 });
   }
 }

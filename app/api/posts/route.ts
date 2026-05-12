@@ -14,17 +14,17 @@ export async function POST(request: Request) {
     // 1. 安全性檢查：確認發送請求的人是否有登入
     const session = await getServerSession(authOptions);
     if (!session || !session.user || !session.user.email) {
-      return NextResponse.json({ error: "未授權的請求" }, { status: 401 });
+      return NextResponse.json({ errorCode: "UNAUTHORIZED" }, { status: 401 });
     }
 
     // 2. 解析前端傳過來的 JSON 資料
     const body = await request.json();
-    
+
     // [修正] 移除 authorEmail，不再信任前端傳來的身分
     const { title, content, coverImage } = body;
 
     if (!title || !content) {
-      return NextResponse.json({ error: "標題與內容為必填欄位" }, { status: 400 });
+      return NextResponse.json({ errorCode: "TITLE_CONTENT_REQUIRED" }, { status: 400 });
     }
 
     // [修正] 強制使用後端驗證過的 Session 信箱作為作者
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error("寫入資料庫失敗:", error);
-    return NextResponse.json({ error: "內部伺服器錯誤" }, { status: 500 });
+    return NextResponse.json({ errorCode: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
 
@@ -74,6 +74,6 @@ export async function GET() {
     return NextResponse.json(posts);
   } catch (error) {
     console.error("讀取文章失敗:", error);
-    return NextResponse.json({ error: "內部伺服器錯誤" }, { status: 500 });
+    return NextResponse.json({ errorCode: "INTERNAL_ERROR" }, { status: 500 });
   }
 }

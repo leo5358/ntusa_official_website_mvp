@@ -8,6 +8,7 @@ export default function ReviewButtons({ postId }: { postId: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const t = useTranslations("review.actions");
+  const tErrors = useTranslations("errors");
 
   const handleUpdateStatus = async (newStatus: "APPROVED" | "REJECTED") => {
     let reason = null;
@@ -47,8 +48,10 @@ export default function ReviewButtons({ postId }: { postId: string }) {
         alert(t("successAlert", { action }));
         router.refresh();
       } else {
-        const errorData = await res.json();
-        alert(t("updateFailed", { error: errorData.error ?? "" }));
+        const errorData = await res.json().catch(() => ({}));
+        const code = typeof errorData?.errorCode === "string" ? errorData.errorCode : "UNKNOWN";
+        const message = tErrors.has(code) ? tErrors(code) : tErrors("UNKNOWN");
+        alert(t("updateFailed", { error: message }));
       }
     } catch (error) {
       console.error("發生錯誤:", error);
