@@ -4,6 +4,7 @@ import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import Link from "next/link";
 import { tabFromHashFragment } from "@/lib/home-active-tab";
 import AlternatingPostList from "./AlternatingPostList";
+import HomeHero from "./HomeHero";
 
 type PostType = {
   id: string;
@@ -99,23 +100,7 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
     <>
       {/* ── PAGE: 首頁 ── */}
       <section className={`page ${activeTab === "home" ? "active" : ""}`} id="home">
-        <div className="hero">
-          <div className="hero-bg-placeholder">
-            <span className="hero-placeholder-label">主視覺橫幅（Banner 圖片區）</span>
-          </div>
-          <div className="hero-overlay"></div>
-          <div className="hero-content fade-up-target">
-            <h1 className="hero-title">臺大學生會</h1>
-            <p className="hero-desc">代表每一位臺大學生，守護學生權益、促進校園民主。</p>
-            <Link href="/#rights" onClick={(e) => navigateTo(e, "rights")} className="btn btn-primary">
-              查看最新學權公告
-            </Link>
-          </div>
-          <div className="hero-scroll-hint">
-            <span>向下捲動</span>
-            <div className="scroll-arrow"></div>
-          </div>
-        </div>
+        <HomeHero />
 
         <div className="section-wrap">
           <div className="section-header fade-up-target">
