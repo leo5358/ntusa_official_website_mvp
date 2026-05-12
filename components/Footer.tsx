@@ -35,6 +35,9 @@ export default function Footer() {
           <div>
             <div className="footer-name">國立臺灣大學學生會</div>
             <div className="footer-name-en">NTU Student Association</div>
+            <a href="mailto:infor@ntusa.ntu.edu.tw" className="footer-contact">
+              infor@ntusa.ntu.edu.tw
+            </a>
           </div>
         </div>
         

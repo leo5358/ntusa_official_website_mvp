@@ -707,6 +707,14 @@ main { margin-top: var(--nav-h); min-height: calc(100vh - var(--nav-h)); }
 }
 .footer-name { font-size: 15px; font-weight: 700; color: var(--color-text-invert); }
 .footer-name-en { font-size: 12px; color: rgba(255,255,255,.45); }
+.footer-contact {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(255,255,255,.55);
+  transition: color var(--transition);
+}
+.footer-contact:hover { color: var(--color-text-invert); }
 .footer-links {
   display: flex; gap: 4px; flex-wrap: wrap;
 }

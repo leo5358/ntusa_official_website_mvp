@@ -25,6 +25,7 @@
     "browser-image-compression": "^2.0.2",
     "next": "16.1.6",
     "next-auth": "^4.24.13",
+    "next-intl": "^4.11.2",
     "pg": "^8.20.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
