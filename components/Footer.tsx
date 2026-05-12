@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -8,27 +7,9 @@ import Link from "next/link";
 export default function Footer() {
   const router = useRouter();
   const pathname = usePathname();
-  const [clickCount, setClickCount] = useState(0);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleSecretClick = () => {
-    const newCount = clickCount + 1;
-    setClickCount(newCount);
-
-    if (newCount === 5) {
-      router.push("/api/auth/signin");
-      setClickCount(0);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      return;
-    }
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      setClickCount(0);
-    }, 2000);
+  const handleLogoClick = () => {
+    router.push("/api/auth/signin");
   };
 
   const handleHashNavigation = (e: React.MouseEvent<HTMLAnchorElement>, hashId: string) => {
@@ -43,7 +24,14 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <Image src="/NTUSA_Logo_1.png" alt="臺大學生會" width={32} height={32} className="logo-mark small" />
+          <button
+            type="button"
+            onClick={handleLogoClick}
+            aria-label="管理員登入"
+            className="footer-logo-button"
+          >
+            <Image src="/NTUSA_Logo_1.png" alt="臺大學生會" width={32} height={32} className="logo-mark small" />
+          </button>
           <div>
             <div className="footer-name">國立臺灣大學學生會</div>
             <div className="footer-name-en">NTU Student Association</div>
@@ -81,10 +69,7 @@ export default function Footer() {
           </a>
         </div>
 
-        <div 
-          className="footer-copy select-none cursor-default" 
-          onClick={handleSecretClick}
-        >
+        <div className="footer-copy">
           © 2026 國立臺灣大學學生會資訊部
         </div>
       </div>
