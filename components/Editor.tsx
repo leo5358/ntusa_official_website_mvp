@@ -6,6 +6,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder"; // 引入 Placeholder
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { uploadImage } from "../lib/upload";
 
 interface EditorProps {
@@ -14,7 +15,9 @@ interface EditorProps {
 
 export default function Editor({ authorEmail }: EditorProps) {
   const router = useRouter();
-  
+  const t = useTranslations("editor");
+  const tToolbar = useTranslations("editor.toolbar");
+
   const [title, setTitle] = useState("");
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +35,7 @@ export default function Editor({ authorEmail }: EditorProps) {
       }),
       Image,
       Placeholder.configure({
-        placeholder: "請在此輸入文章內容...",
+        placeholder: t("contentPlaceholder"),
         emptyEditorClass: "is-editor-empty",
       }),
     ],
@@ -73,7 +76,7 @@ export default function Editor({ authorEmail }: EditorProps) {
 
   const handleSubmit = async () => {
     if (!title.trim() || !editor || editor.isEmpty) {
-      alert("請填寫標題與內容！");
+      alert(t("missingFields"));
       return;
     }
 
@@ -91,13 +94,13 @@ export default function Editor({ authorEmail }: EditorProps) {
       });
 
       if (res.ok) {
-        alert("文章發布成功！");
+        alert(t("submitSuccess"));
         router.push("/");
       } else {
-        throw new Error("發布失敗");
+        throw new Error(t("submitFailedInternal"));
       }
     } catch (error) {
-      alert("系統發生錯誤，請稍後再試。");
+      alert(t("submitError"));
       console.error(error);
     } finally {
       setIsSubmitting(false);
@@ -112,19 +115,19 @@ export default function Editor({ authorEmail }: EditorProps) {
     <div className="flex flex-col gap-6 text-gray-900">
       {/* 標題區 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">文章標題</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t("titleLabel")}</label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="請輸入一個響亮的標題..."
+          placeholder={t("titlePlaceholder")}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
         />
       </div>
 
       {/* 封面圖區 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">封面圖片</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t("coverLabel")}</label>
         {coverImage && (
           <img src={coverImage} alt="Cover Preview" className="mb-2 max-w-xs rounded-md shadow-sm object-cover" />
         )}
@@ -142,9 +145,9 @@ export default function Editor({ authorEmail }: EditorProps) {
         {/* 工具列 (支援換行顯示) */}
         <div className="border-b border-gray-300 p-2 flex flex-wrap gap-1 bg-gray-100">
            {/* 文字樣式 */}
-           <button onClick={() => editor?.chain().focus().toggleBold().run()} className={getButtonClass(editor?.isActive('bold'))}>粗體</button>
-           <button onClick={() => editor?.chain().focus().toggleItalic().run()} className={getButtonClass(editor?.isActive('italic'))}>斜體</button>
-           <button onClick={() => editor?.chain().focus().toggleStrike().run()} className={getButtonClass(editor?.isActive('strike'))}>刪除線</button>
+           <button onClick={() => editor?.chain().focus().toggleBold().run()} className={getButtonClass(editor?.isActive('bold'))}>{tToolbar("bold")}</button>
+           <button onClick={() => editor?.chain().focus().toggleItalic().run()} className={getButtonClass(editor?.isActive('italic'))}>{tToolbar("italic")}</button>
+           <button onClick={() => editor?.chain().focus().toggleStrike().run()} className={getButtonClass(editor?.isActive('strike'))}>{tToolbar("strike")}</button>
            
            <div className="w-px bg-gray-300 mx-1 my-1"></div>
            
@@ -156,27 +159,27 @@ export default function Editor({ authorEmail }: EditorProps) {
            <div className="w-px bg-gray-300 mx-1 my-1"></div>
 
            {/* 列表與區塊 */}
-           <button onClick={() => editor?.chain().focus().toggleBulletList().run()} className={getButtonClass(editor?.isActive('bulletList'))}>項目清單</button>
-           <button onClick={() => editor?.chain().focus().toggleOrderedList().run()} className={getButtonClass(editor?.isActive('orderedList'))}>編號清單</button>
-           <button onClick={() => editor?.chain().focus().toggleBlockquote().run()} className={getButtonClass(editor?.isActive('blockquote'))}>引用</button>
-           <button onClick={() => editor?.chain().focus().setHorizontalRule().run()} className={getButtonClass()}>分隔線</button>
+           <button onClick={() => editor?.chain().focus().toggleBulletList().run()} className={getButtonClass(editor?.isActive('bulletList'))}>{tToolbar("bulletList")}</button>
+           <button onClick={() => editor?.chain().focus().toggleOrderedList().run()} className={getButtonClass(editor?.isActive('orderedList'))}>{tToolbar("orderedList")}</button>
+           <button onClick={() => editor?.chain().focus().toggleBlockquote().run()} className={getButtonClass(editor?.isActive('blockquote'))}>{tToolbar("blockquote")}</button>
+           <button onClick={() => editor?.chain().focus().setHorizontalRule().run()} className={getButtonClass()}>{tToolbar("hr")}</button>
 
            <div className="w-px bg-gray-300 mx-1 my-1"></div>
 
            {/* 歷史紀錄 */}
-           <button onClick={() => editor?.chain().focus().undo().run()} disabled={!editor?.can().undo()} className="px-2 py-1.5 rounded text-sm font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-30">復原</button>
-           <button onClick={() => editor?.chain().focus().redo().run()} disabled={!editor?.can().redo()} className="px-2 py-1.5 rounded text-sm font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-30">重做</button>
+           <button onClick={() => editor?.chain().focus().undo().run()} disabled={!editor?.can().undo()} className="px-2 py-1.5 rounded text-sm font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-30">{tToolbar("undo")}</button>
+           <button onClick={() => editor?.chain().focus().redo().run()} disabled={!editor?.can().redo()} className="px-2 py-1.5 rounded text-sm font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-30">{tToolbar("redo")}</button>
 
            <div className="flex-grow"></div> {/* 將插入圖片推到最右邊 */}
 
            {/* 插入圖片 */}
            <input type="file" accept="image/*" ref={fileInputRef} onChange={onEditorImageChange} className="hidden" />
-           <button 
+           <button
              onClick={() => fileInputRef.current?.click()}
              className="px-3 py-1.5 rounded text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors disabled:opacity-50 border border-blue-200"
              disabled={isUploadingImage}
            >
-             {isUploadingImage ? "圖片上傳中..." : "插入圖片"}
+             {isUploadingImage ? tToolbar("uploadingImage") : tToolbar("insertImage")}
            </button>
         </div>
         
@@ -191,7 +194,7 @@ export default function Editor({ authorEmail }: EditorProps) {
           disabled={isSubmitting || isUploadingImage || !title.trim()}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-md disabled:bg-gray-400 transition-colors shadow-sm"
         >
-          {isSubmitting ? "發布中..." : "送出並發布"}
+          {isSubmitting ? t("submitButtonLoading") : t("submitButton")}
         </button>
       </div>
     </div>

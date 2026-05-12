@@ -2,22 +2,25 @@ import prisma from "../../lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../lib/auth";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import ReviewButtons from "../../components/ReviewButtons";
 import Link from "next/link";
 
 // 💡 這裡設定公關部的信箱（可以設定多個），匹配到的人就有審核權限
 const PR_EMAILS = ["liyu.yang@ntusa.ntu.edu.tw", "admin@ntusa.ntu.edu.tw", "shippo.hsu@ntusa.ntu.edu.tw"];
 
+type StatusLabels = { approved: string; rejected: string; pending: string };
+
 // 輔助元件：狀態標籤
-const StatusBadge = ({ status }: { status: string }) => {
+const StatusBadge = ({ status, labels }: { status: string; labels: StatusLabels }) => {
   switch (status) {
     case "APPROVED":
-      return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">已通過</span>;
+      return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">{labels.approved}</span>;
     case "REJECTED":
-      return <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">已退回</span>;
+      return <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">{labels.rejected}</span>;
     case "PENDING":
     default:
-      return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">審核中</span>;
+      return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">{labels.pending}</span>;
   }
 };
 
@@ -31,6 +34,13 @@ export default async function ReviewDashboard() {
   const userEmail = session.user.email;
   const isPR = PR_EMAILS.includes(userEmail);
 
+  const t = await getTranslations("review");
+  const statusLabels: StatusLabels = {
+    approved: t("status.approved"),
+    rejected: t("status.rejected"),
+    pending: t("status.pending"),
+  };
+
   // 2. 根據身分撈取文章
   // - 公關部 (isPR): 撈取所有「待審核 (PENDING)」的文章
   // - 一般部門: 撈取「自己部門 (authorEmail)」發布的所有文章
@@ -42,26 +52,26 @@ export default async function ReviewDashboard() {
     <div className="max-w-5xl mx-auto p-8 pt-24">
       <div className="mb-8 border-b pb-4">
         <h1 className="text-3xl font-bold text-gray-800">
-          {isPR ? "審核者儀表板" : "部門文章狀態"}
+          {isPR ? t("prDashboardTitle") : t("deptDashboardTitle")}
         </h1>
         <p className="text-gray-500 mt-2">
-          {isPR 
-            ? "公關部專用：以下顯示各部門提交的待審核文章。" 
-            : `目前登入身分：${userEmail}，以下為您提交過的文章狀態。`}
+          {isPR
+            ? t("prDashboardSub")
+            : t("deptDashboardSub", { email: userEmail })}
         </p>
       </div>
 
       {targetPosts.length === 0 ? (
         <div className="bg-gray-50 p-8 text-center rounded-lg border border-dashed">
           <p className="text-gray-500 text-lg">
-            {isPR ? "目前沒有任何待審核的文章" : "您目前尚未提交過任何文章"}
+            {isPR ? t("emptyPR") : t("emptyDept")}
           </p>
         </div>
       ) : (
         <div className="grid gap-6">
           {targetPosts.map((post) => (
-            <div 
-              key={post.id} 
+            <div
+              key={post.id}
               className="border border-gray-200 p-6 rounded-lg shadow-sm bg-white flex flex-col"
             >
               {/* 上半部：標題、資訊與按鈕 */}
@@ -70,13 +80,13 @@ export default async function ReviewDashboard() {
                   <div className="flex items-center gap-3 mb-2">
                     <h2 className="text-xl font-semibold text-gray-900">{post.title}</h2>
                     {/* 一般部門顯示狀態 Badge，公關部如果是看 PENDING 也可以顯示 */}
-                    {!isPR && <StatusBadge status={post.status} />}
+                    {!isPR && <StatusBadge status={post.status} labels={statusLabels} />}
                   </div>
                   <div className="text-sm text-gray-600 space-y-1">
                     {isPR && (
-                      <p><span className="font-medium">提交者信箱：</span> {post.authorEmail}</p>
+                      <p><span className="font-medium">{t("submitterLabel")}</span> {post.authorEmail}</p>
                     )}
-                    <p><span className="font-medium">提交時間：</span> {new Date(post.createdAt).toLocaleString("zh-TW")}</p>
+                    <p><span className="font-medium">{t("submittedAtLabel")}</span> {new Date(post.createdAt).toLocaleString(t("dateLocale"))}</p>
                   </div>
                 </div>
 
@@ -90,34 +100,34 @@ export default async function ReviewDashboard() {
                   <svg className="w-5 h-5 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                  檢視文章完整內容
+                  {t("viewContent")}
                 </summary>
-                
+
                 <div className="mt-4 p-6 bg-gray-50 rounded-lg border border-gray-100">
                   {post.coverImage && (
                     <div className="mb-6">
-                      <span className="text-sm text-gray-500 font-medium block mb-2">封面圖片：</span>
-                      <img 
-                        src={post.coverImage} 
-                        alt="封面圖片預覽" 
+                      <span className="text-sm text-gray-500 font-medium block mb-2">{t("coverPreviewLabel")}</span>
+                      <img
+                        src={post.coverImage}
+                        alt={t("coverPreviewAlt")}
                         className="max-w-md w-full h-auto object-cover rounded-md shadow-sm"
                       />
                     </div>
                   )}
-                  
-                  <span className="text-sm text-gray-500 font-medium block mb-2">文章內容：</span>
-                  <div 
+
+                  <span className="text-sm text-gray-500 font-medium block mb-2">{t("contentLabel")}</span>
+                  <div
                     className="tiptap prose max-w-none bg-white p-4 border rounded-md"
-                    dangerouslySetInnerHTML={{ __html: post.content }} 
+                    dangerouslySetInnerHTML={{ __html: post.content }}
                   />
-                  
+
                   <div className="mt-4 text-right">
-                    <Link 
-                      href={`/post/${post.id}`} 
-                      target="_blank" 
+                    <Link
+                      href={`/post/${post.id}`}
+                      target="_blank"
                       className="text-sm text-gray-500 hover:text-gray-700 underline"
                     >
-                      在新分頁模擬前台畫面 ↗
+                      {t("previewInNewTab")}
                     </Link>
                   </div>
                 </div>

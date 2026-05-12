@@ -3,11 +3,13 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import Editor from "../../components/Editor";
 
 export default function EditorPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const t = useTranslations("editor");
 
   // check login status and redirect if not authenticated
   useEffect(() => {
@@ -19,14 +21,14 @@ export default function EditorPage() {
   if (status === "loading" || status === "unauthenticated") {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500 text-lg">驗證身分中...</p>
+        <p className="text-gray-500 text-lg">{t("authVerifying")}</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-sm mt-8 rounded-lg">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">發布新文章</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">{t("pageTitle")}</h1>
       {/* 呼叫真正的編輯器核心組件，並把作者的信箱傳進去 */}
       <Editor authorEmail={session?.user?.email as string} />
     </div>

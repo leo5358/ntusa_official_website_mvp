@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function ReviewButtons({ postId }: { postId: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const t = useTranslations("review.actions");
 
   const handleUpdateStatus = async (newStatus: "APPROVED" | "REJECTED") => {
     let reason = null;
@@ -13,17 +15,17 @@ export default function ReviewButtons({ postId }: { postId: string }) {
     // 1. 根據按下的按鈕決定不同的互動邏輯
     if (newStatus === "REJECTED") {
       // 退回時要求輸入原因
-      reason = window.prompt("請輸入退回原因（必填，將附在通知信中）：");
-      
+      reason = window.prompt(t("rejectPrompt"));
+
       // 如果按取消或沒有輸入內容，則中斷操作
-      if (reason === null) return; 
+      if (reason === null) return;
       if (reason.trim() === "") {
-        alert("退回文章必須填寫原因！");
+        alert(t("rejectMissingReason"));
         return;
       }
     } else {
       // 核准時只做簡單確認
-      if (!window.confirm("確定要將此文章「核准」嗎？")) return;
+      if (!window.confirm(t("approveConfirm"))) return;
     }
 
     setIsLoading(true);
@@ -34,23 +36,23 @@ export default function ReviewButtons({ postId }: { postId: string }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           status: newStatus,
-          rejectReason: reason // 傳送退回原因
+          rejectReason: reason, // 傳送退回原因
         }),
       });
 
       if (res.ok) {
-        const actionName = newStatus === "APPROVED" ? "核准" : "退回";
-        alert(`已成功${actionName}文章！`);
-        router.refresh(); 
+        const action = newStatus === "APPROVED" ? t("approveActionName") : t("rejectActionName");
+        alert(t("successAlert", { action }));
+        router.refresh();
       } else {
         const errorData = await res.json();
-        alert(`更新失敗: ${errorData.error}`);
+        alert(t("updateFailed", { error: errorData.error ?? "" }));
       }
     } catch (error) {
       console.error("發生錯誤:", error);
-      alert("系統發生錯誤，請稍後再試。");
+      alert(t("systemError"));
     } finally {
       setIsLoading(false);
     }
@@ -63,14 +65,14 @@ export default function ReviewButtons({ postId }: { postId: string }) {
         disabled={isLoading}
         className="btn bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 border-none"
       >
-        {isLoading ? "處理中..." : "核准 (Approve)"}
+        {isLoading ? t("buttonLoading") : t("approveButton")}
       </button>
       <button
         onClick={() => handleUpdateStatus("REJECTED")}
         disabled={isLoading}
         className="btn bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 border-none"
       >
-        {isLoading ? "處理中..." : "退回 (Reject)"}
+        {isLoading ? t("buttonLoading") : t("rejectButton")}
       </button>
     </div>
   );
