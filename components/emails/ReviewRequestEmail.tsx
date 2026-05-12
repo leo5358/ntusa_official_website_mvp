@@ -36,8 +36,7 @@ import {
                 請登入官網的「審核者儀表板」進行內容確認，並執行核准或退回操作。
               </Text>
   
-              {/* 如果你的正式機網址出來了，可以把 href 換成正式網址 */}
-              <Link href="https://你的正式網址.com/review" style={button}>
+              <Link href="https://ntusa.ntu.edu.tw/review" style={button}>
                 前往審核儀表板
               </Link>
             </Section>
