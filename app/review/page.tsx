@@ -6,7 +6,7 @@ import ReviewButtons from "../../components/ReviewButtons";
 import Link from "next/link";
 
 // 💡 這裡設定公關部的信箱（可以設定多個），匹配到的人就有審核權限
-const PR_EMAILS = ["liyu.yang@ntusa.ntu.edu.tw", "admin@ntusa.ntu.edu.tw"];
+const PR_EMAILS = ["liyu.yang@ntusa.ntu.edu.tw", "admin@ntusa.ntu.edu.tw", "shippo.hsu@ntusa.ntu.edu.tw"];
 
 // 輔助元件：狀態標籤
 const StatusBadge = ({ status }: { status: string }) => {
