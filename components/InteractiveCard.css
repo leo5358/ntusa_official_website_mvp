@@ -1,0 +1,94 @@
+/* 調整舞台容器，使其更像一個 Hero 區塊 */
+.stage {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem; /* 增加上下間距 */
+  min-height: 60vh;   /* 確保有足夠的高度填滿視野 */
+}
+
+.scene {
+  width: 100%;
+  max-width: 1100px; /* 您可以根據需求調整最大寬度 */
+  perspective: 1200px; /* 增加透視深度感 */
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  height: 480px; /* 顯著增加高度 */
+  border-radius: 32px; /* 更圓潤的邊角 */
+  cursor: pointer;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: box-shadow .6s cubic-bezier(.23, 1, .32, 1);
+  background: linear-gradient(135deg, #313646 0%, #4a5068 45%, #72B3C0 100%);
+  box-shadow:
+    0 20px 60px rgba(49, 54, 70, .2),
+    0 8px 20px rgba(49, 54, 70, .1);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* 內部裝飾光影同步加大 */
+.card-noise {
+  position: absolute;
+  inset: 0;
+  border-radius: 32px;
+  z-index: 1;
+  background-image:
+    radial-gradient(circle at 80% 20%, rgba(114, 179, 192, .25) 0%, transparent 60%),
+    radial-gradient(circle at 10% 85%, rgba(49, 54, 70, .4) 0%, transparent 55%);
+}
+
+.card-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  padding: 60px 72px; /* 大幅增加內距 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* 縮放文字尺寸 */
+.card-label {
+  font-size: 16px; /* 原 12px */
+  font-weight: 500;
+  letter-spacing: .2em;
+  color: rgba(255, 255, 255, .5);
+}
+
+.card-title {
+  font-size: 56px; /* 原 22px，大幅強化視覺焦點 */
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: .05em;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.card-desc {
+  font-size: 20px; /* 原 13px */
+  font-weight: 400;
+  color: rgba(255, 255, 255, .75);
+  line-height: 1.6;
+}
+
+/* 行動裝置適配 */
+@media (max-width: 768px) {
+  .card {
+    height: 350px;
+  }
+  .card-inner {
+    padding: 40px;
+  }
+  .card-title {
+    font-size: 32px;
+  }
+  .card-desc {
+    font-size: 16px;
+  }
+}
