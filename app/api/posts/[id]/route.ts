@@ -9,7 +9,7 @@ import ApprovalNotificationEmail from "../../../../components/emails/ApprovalNot
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // 統一在此處定義公關部信箱
-const PR_EMAILS = ["liyu.yang@ntusa.ntu.edu.tw", "admin@ntusa.ntu.edu.tw"];
+const PR_EMAILS = ["liyu.yang@ntusa.ntu.edu.tw", "admin@ntusa.ntu.edu.tw", "shippo.hsu@ntusa.ntu.edu.tw""];
 
 // DELETE 方法：刪除文章
 export async function DELETE(

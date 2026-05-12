@@ -7,7 +7,7 @@ import ReviewRequestEmail from "../../../components/emails/ReviewRequestEmail";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const PR_EMAILS = ["liyu.yang@ntusa.ntu.edu.tw", "admin@ntusa.ntu.edu.tw"];
+const PR_EMAILS = ["liyu.yang@ntusa.ntu.edu.tw", "admin@ntusa.ntu.edu.tw", "shippo.hsu@ntusa.ntu.edu.tw"];
 
 export async function POST(request: Request) {
   try {
