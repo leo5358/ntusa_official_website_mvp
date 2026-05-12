@@ -25,7 +25,11 @@ export default function Editor({ authorEmail }: EditorProps) {
   // 初始化 Tiptap 編輯器
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        heading: {
+          levels: [1, 2, 3],
+        },
+      }),
       Image,
       Placeholder.configure({
         placeholder: "請在此輸入文章內容...",
@@ -36,8 +40,9 @@ export default function Editor({ authorEmail }: EditorProps) {
     content: "", // 清空預設內容，改由 Placeholder 接手
     editorProps: {
       attributes: {
+        // 加入 tiptap class 以配合 globals.css 中的樣式
         // 加入 text-gray-900 強制深色文字，避免在深色模式下變成白底白字
-        className: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[400px] border border-gray-300 rounded-md p-4 text-gray-900",
+        className: "tiptap prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[400px] border border-gray-300 rounded-md p-4 text-gray-900",
       },
     },
   });

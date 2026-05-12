@@ -78,7 +78,7 @@ export default async function PostPage({
 
       {/* 文章內容 (HTML 渲染) */}
       <div 
-        className="prose prose-lg max-w-none prose-blue"
+        className="tiptap prose prose-lg max-w-none prose-blue"
         dangerouslySetInnerHTML={{ __html: post.content }} 
       />
 
