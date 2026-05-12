@@ -107,7 +107,7 @@ export default async function ReviewDashboard() {
                   
                   <span className="text-sm text-gray-500 font-medium block mb-2">文章內容：</span>
                   <div 
-                    className="prose max-w-none bg-white p-4 border rounded-md"
+                    className="tiptap prose max-w-none bg-white p-4 border rounded-md"
                     dangerouslySetInnerHTML={{ __html: post.content }} 
                   />
                   
