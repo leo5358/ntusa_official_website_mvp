@@ -86,7 +86,11 @@ export default async function ReviewDashboard() {
                     {isPR && (
                       <p><span className="font-medium">{t("submitterLabel")}</span> {post.authorEmail}</p>
                     )}
+<<<<<<< HEAD
                     <p><span className="font-medium">{t("submittedAtLabel")}</span> {new Date(post.createdAt).toLocaleString(t("dateLocale"))}</p>
+=======
+                    <p><span className="font-medium">提交時間：</span> {new Date(post.createdAt).toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })}</p>
+>>>>>>> 412a135 (fix(i18n): ensure post dates are consistently displayed in Asia/Taipei timezone)
                   </div>
                 </div>
 

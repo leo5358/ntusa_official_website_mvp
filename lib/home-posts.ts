@@ -28,6 +28,7 @@ export function formatPostsForHome(posts: PostRowForHome[]): HomePostPreview[] {
       year: "numeric",
       month: "long",
       day: "numeric",
+      timeZone: "Asia/Taipei",
     }),
     coverImage: post.coverImage,
   }));

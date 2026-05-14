@@ -75,7 +75,11 @@ export default async function PostPage({
       <div className="flex items-center text-gray-500 text-sm mb-8 border-b pb-8">
         <span className="mr-4">{t("authorLabel")}{post.authorEmail}</span>
         <span>
+<<<<<<< HEAD
           {t("publishedLabel")}{new Date(post.createdAt).toLocaleDateString(t("dateLocale"), { year: 'numeric', month: 'long', day: 'numeric' })}
+=======
+          發布時間：{new Date(post.createdAt).toLocaleDateString("zh-TW", { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Taipei' })}
+>>>>>>> 412a135 (fix(i18n): ensure post dates are consistently displayed in Asia/Taipei timezone)
         </span>
       </div>
 
