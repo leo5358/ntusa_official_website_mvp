@@ -20,6 +20,7 @@ model Post {
   content      String
   coverImage   String?
   authorEmail  String
+  authorName   String?    // 新增作者名稱欄位
   department   String?    // 新增部門欄位
   status       PostStatus @default(PENDING) // 新增狀態欄位，預設為待審核
   rejectReason String?

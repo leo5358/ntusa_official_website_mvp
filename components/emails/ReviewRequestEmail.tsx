@@ -12,9 +12,11 @@ import {
   interface ReviewRequestEmailProps {
     postTitle: string;
     authorEmail: string;
+    authorName?: string;
+    department?: string;
   }
   
-  export default function ReviewRequestEmail({ postTitle, authorEmail }: ReviewRequestEmailProps) {
+  export default function ReviewRequestEmail({ postTitle, authorEmail, authorName, department }: ReviewRequestEmailProps) {
     return (
       <Html>
         <Body style={main}>
@@ -29,7 +31,8 @@ import {
               
               <div style={infoBox}>
                 <Text style={infoText}>文章標題：{postTitle}</Text>
-                <Text style={infoText}>提交部門：{authorEmail}</Text>
+                <Text style={infoText}>提交人：{authorName || authorEmail}</Text>
+                <Text style={infoText}>提交部門：{department || "一般部門"}</Text>
               </div>
   
               <Text style={text}>

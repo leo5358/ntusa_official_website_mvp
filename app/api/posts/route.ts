@@ -40,6 +40,7 @@ export async function POST(request: Request) {
         content,
         coverImage,
         authorEmail, // 使用後端取得的信箱
+        authorName: session.user.name, // 存入發文者的名字
         department: session.user.department, // 存入發文者的部門
       },
     });
@@ -53,6 +54,8 @@ export async function POST(request: Request) {
         react: ReviewRequestEmail({
           postTitle: title,
           authorEmail: authorEmail,
+          authorName: session.user.name || undefined,
+          department: session.user.department || undefined,
         }) as React.ReactElement,
       });
       
