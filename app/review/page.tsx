@@ -31,7 +31,7 @@ export default async function ReviewDashboard() {
   const userRole = session.user.role;
   const userDepartment = session.user.department;
   const userEmail = session.user.email || "";
-  const isPR = userRole === "admin" || userRole === "reviewer";
+  const isPR = userRole === "admin" || userDepartment === "公關部";
 
   const t = await getTranslations("review");
   const statusLabels: StatusLabels = {

@@ -26,16 +26,16 @@ export default async function EditPage({
     notFound();
   }
 
-  // 2. 權限驗證：只有「原作者本人」或「同部門成員」或「具備管理權限 (admin/reviewer)」可以修改文章
+  // 2. 權限驗證：只有「原作者本人」或「同部門成員」或「具備管理權限 (admin/公關部)」可以修改文章
   const userEmail = session.user.email;
   const userRole = session.user.role;
   const userDepartment = session.user.department;
 
   const isAuthor = post.authorEmail === userEmail;
   const isDeptMember = post.department === userDepartment;
-  const canManageAll = userRole === "admin" || userRole === "reviewer";
+  const isReviewer = userRole === "admin" || userDepartment === "公關部";
 
-  if (!isAuthor && !isDeptMember && !canManageAll) {
+  if (!isAuthor && !isDeptMember && !isReviewer) {
     redirect("/review"); // 權限不足則跳回儀表板
   }
 

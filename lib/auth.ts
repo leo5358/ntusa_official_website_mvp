@@ -41,7 +41,7 @@ export const authOptions: NextAuthOptions = {
             role = "admin";
             department = "資訊部";
             break;
-          } else if (groupEmail === "pr@ntusa.ntu.edu.tw") {
+          } else if (groupEmail === "pr-dept@ntusa.ntu.edu.tw") {
             role = "reviewer";
             department = "公關部";
             break;

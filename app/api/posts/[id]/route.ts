@@ -12,7 +12,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // 從 .env 讀取審核者信箱清單
 const PR_EMAILS = process.env.REVIEWER_EMAILS 
   ? process.env.REVIEWER_EMAILS.split(",").map(email => email.trim())
-  : ["admin@ntusa.ntu.edu.tw"];
+  : ["pr-dept@ntusa.ntu.edu.tw"];
 
 // DELETE 方法：刪除文章
 export async function DELETE(
@@ -33,16 +33,16 @@ export async function DELETE(
       return NextResponse.json({ errorCode: "POST_NOT_FOUND" }, { status: 404 });
     }
 
-    // [修正] 權限驗證：只有「原作者本人」、「同部門成員」或「具備管理權限 (admin/reviewer)」可以刪除文章
+    // [修正] 權限驗證：只有「原作者本人」、「同部門成員」或「具備管理權限 (admin/公關部)」可以刪除文章
     const userEmail = session.user.email;
     const userRole = session.user.role;
     const userDepartment = session.user.department;
 
     const isAuthor = post.authorEmail === userEmail;
     const isDeptMember = post.department === userDepartment;
-    const canManageAll = userRole === "admin" || userRole === "reviewer";
+    const isReviewer = userRole === "admin" || userDepartment === "公關部";
 
-    if (!isAuthor && !isDeptMember && !canManageAll) {
+    if (!isAuthor && !isDeptMember && !isReviewer) {
       return NextResponse.json({ errorCode: "FORBIDDEN_DELETE" }, { status: 403 });
     }
 
@@ -82,11 +82,11 @@ export async function PATCH(
 
     const isAuthor = post.authorEmail === userEmail;
     const isDeptMember = post.department === userDepartment;
-    const canManageAll = userRole === "admin" || userRole === "reviewer";
+    const isReviewer = userRole === "admin" || userDepartment === "公關部";
 
     // 1. 審核邏輯 (變更狀態)
     if (status && !title) {
-      if (userRole !== "admin" && userRole !== "reviewer") {
+      if (!isReviewer) {
         return NextResponse.json({ errorCode: "FORBIDDEN_REVIEW" }, { status: 403 });
       }
 
@@ -132,7 +132,7 @@ export async function PATCH(
 
     // 2. 編輯邏輯 (變更內容)
     if (title || content) {
-      if (!isAuthor && !isDeptMember && !canManageAll) {
+      if (!isAuthor && !isDeptMember && !isReviewer) {
         return NextResponse.json({ errorCode: "FORBIDDEN_UPDATE" }, { status: 403 });
       }
 
