@@ -7,7 +7,10 @@ import ReviewRequestEmail from "../../../components/emails/ReviewRequestEmail";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const PR_EMAILS = ["liyu.yang@ntusa.ntu.edu.tw", "admin@ntusa.ntu.edu.tw", "shippo.hsu@ntusa.ntu.edu.tw"];
+// 從 .env 讀取審核者信箱清單，若沒設定則提供基本預設值
+const PR_EMAILS = process.env.REVIEWER_EMAILS 
+  ? process.env.REVIEWER_EMAILS.split(",").map(email => email.trim())
+  : ["admin@ntusa.ntu.edu.tw"];
 
 export async function POST(request: Request) {
   try {
