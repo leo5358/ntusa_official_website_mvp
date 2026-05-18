@@ -30,16 +30,18 @@ export interface GoogleGroup {
  * Requires Domain-Wide Delegation and the Admin SDK Directory API enabled.
  */
 export async function getUserGroups(userKey: string): Promise<GoogleGroup[]> {
+  console.log(`[GoogleAdmin] Fetching groups for: ${userKey}`);
   if (!GOOGLE_SERVICE_ACCOUNT_EMAIL || !GOOGLE_PRIVATE_KEY || !GOOGLE_WORKSPACE_ADMIN_EMAIL) {
-    console.warn('Google Admin SDK credentials not fully configured. Skipping group fetch.');
+    console.warn('[GoogleAdmin] Credentials not fully configured. Skipping group fetch.');
     return [];
   }
 
   try {
     const response = await admin.groups.list({ userKey });
+    console.log(`[GoogleAdmin] Groups found for ${userKey}:`, response.data.groups?.map(g => g.email) || []);
     return response.data.groups || [];
   } catch (error) {
-    console.error(`Error fetching groups for ${userKey}:`, error);
+    console.error(`[GoogleAdmin] Error fetching groups for ${userKey}:`, error);
     return [];
   }
 }

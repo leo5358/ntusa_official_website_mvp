@@ -26,6 +26,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       // 第一次登入時，從 Google Directory API 取得群組資訊
       if (account && user && user.email) {
+        console.log(`[NextAuth] Initial sign-in for: ${user.email}`);
         const groups = await getUserGroups(user.email);
         
         let role: "admin" | "reviewer" | "editor" = "editor";
@@ -34,6 +35,7 @@ export const authOptions: NextAuthOptions = {
         // 根據群組信箱對應角色與部門 (請根據實際群組信箱修改)
         for (const group of groups) {
           const groupEmail = group.email?.toLowerCase();
+          console.log(`[NextAuth] Checking group: ${groupEmail}`);
           
           if (groupEmail === "infor@ntusa.ntu.edu.tw") {
             role = "admin";
@@ -50,6 +52,7 @@ export const authOptions: NextAuthOptions = {
           }
         }
 
+        console.log(`[NextAuth] Assigned Role: ${role}, Department: ${department}`);
         token.role = role;
         token.department = department;
       }
