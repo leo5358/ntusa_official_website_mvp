@@ -12,15 +12,21 @@ import { uploadImage } from "../lib/upload";
 interface EditorProps {
   authorEmail: string;
   department?: string;
+  initialData?: {
+    id: string;
+    title: string;
+    content: string;
+    coverImage: string | null;
+  };
 }
 
-export default function Editor({ authorEmail, department }: EditorProps) {
+export default function Editor({ authorEmail, department, initialData }: EditorProps) {
   const router = useRouter();
   const t = useTranslations("editor");
   const tToolbar = useTranslations("editor.toolbar");
 
-  const [title, setTitle] = useState("");
-  const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [coverImage, setCoverImage] = useState<string | null>(initialData?.coverImage || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
@@ -41,7 +47,7 @@ export default function Editor({ authorEmail, department }: EditorProps) {
       }),
     ],
     immediatelyRender: false,
-    content: "", // 清空預設內容，改由 Placeholder 接手
+    content: initialData?.content || "", // 如果有初始資料則填入
     editorProps: {
       attributes: {
         // 加入 tiptap class 以配合 globals.css 中的樣式
@@ -83,22 +89,27 @@ export default function Editor({ authorEmail, department }: EditorProps) {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/posts", {
-        method: "POST",
+      const isEdit = !!initialData?.id;
+      const url = isEdit ? `/api/posts/${initialData.id}` : "/api/posts";
+      const method = isEdit ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method: method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           content: editor.getHTML(),
           coverImage,
           authorEmail,
+          status: isEdit ? "PENDING" : undefined, // 編輯後重新進入待審核狀態
         }),
       });
 
       if (res.ok) {
-        alert(t("submitSuccess"));
-        router.push("/");
+        alert(isEdit ? t("updateSuccess") : t("submitSuccess"));
+        router.push(isEdit ? "/review" : "/");
       } else {
-        throw new Error(t("submitFailedInternal"));
+        throw new Error(isEdit ? t("updateFailedInternal") : t("submitFailedInternal"));
       }
     } catch (error) {
       alert(t("submitError"));

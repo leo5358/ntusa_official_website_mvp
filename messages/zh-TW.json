@@ -205,8 +205,10 @@
     },
     "missingFields": "請填寫標題與內容！",
     "submitSuccess": "文章發布成功！",
+    "updateSuccess": "文章更新成功，已重新送交審核！",
     "submitError": "系統發生錯誤，請稍後再試。",
     "submitFailedInternal": "發布失敗",
+    "updateFailedInternal": "更新失敗",
     "submitButton": "送出並發布",
     "submitButtonLoading": "發布中..."
   },
@@ -242,6 +244,7 @@
       "systemError": "系統發生錯誤，請稍後再試。",
       "approveButton": "核准 (Approve)",
       "rejectButton": "退回 (Reject)",
+      "editButton": "修改文章",
       "buttonLoading": "處理中..."
     }
   },

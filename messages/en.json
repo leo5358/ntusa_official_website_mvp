@@ -205,8 +205,10 @@
     },
     "missingFields": "Please fill in both title and content.",
     "submitSuccess": "Article published successfully.",
+    "updateSuccess": "Article updated successfully and resubmitted for review.",
     "submitError": "Something went wrong. Please try again later.",
     "submitFailedInternal": "Publish failed",
+    "updateFailedInternal": "Update failed",
     "submitButton": "Submit and publish",
     "submitButtonLoading": "Publishing…"
   },
@@ -242,6 +244,7 @@
       "systemError": "Something went wrong. Please try again later.",
       "approveButton": "Approve",
       "rejectButton": "Reject",
+      "editButton": "Edit Post",
       "buttonLoading": "Processing…"
     }
   },
