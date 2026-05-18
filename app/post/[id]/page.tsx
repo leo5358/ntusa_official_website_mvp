@@ -31,9 +31,22 @@ export default async function PostPage({
 
   // 3. 安全性攔截邏輯：如果文章不是「已核准」狀態
   if (post.status !== "APPROVED") {
-    // 如果沒有登入，直接回傳 404，不讓訪客知道這篇文章的存在
+    // 沒登入直接擋掉
     if (!session || !session.user) {
-      notFound(); 
+      notFound();
+    }
+
+    const userEmail = session.user.email;
+    const userRole = session.user.role;
+    const userDepartment = session.user.department;
+
+    const isAuthor = post.authorEmail === userEmail;
+    const isDeptMember = post.department === userDepartment;
+    const canManageAll = userRole === "admin" || userRole === "reviewer";
+
+    // 如果既不是作者，也不是同部門成員，也不是審核者，就回傳 404
+    if (!isAuthor && !isDeptMember && !canManageAll) {
+      notFound();
     }
   }
 
@@ -52,7 +65,7 @@ export default async function PostPage({
             </div>
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
-                <strong>{t("unpublishedNotice")}</strong> {t("unpublishedBody")} <span className="font-mono bg-yellow-100 px-1 rounded">{post.status}</span>{t("unpublishedBodyTail")}
+                <strong>{t("unpublishedNotice")}</strong> {t("unpublishedBody")} <span className="font-bold text-red-600 px-1 rounded">{t(`status.${post.status}`)}</span>{t("unpublishedBodyTail")}
               </p>
             </div>
           </div>

@@ -165,6 +165,12 @@
     "unpublishedNotice": "Notice:",
     "unpublishedBody": "This article's current status is",
     "unpublishedBodyTail": "and is not yet public. This page is currently visible only to internal staff.",
+    "status": {
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "PENDING": "Pending",
+      "DRAFT": "Draft"
+    },
     "authorLabel": "Author:",
     "publishedLabel": "Published:",
     "backToHome": "Back to home",
@@ -213,6 +219,7 @@
     "emptyDept": "You have not submitted any articles yet.",
     "submitterLabel": "Submitted by:",
     "submittedAtLabel": "Submitted at:",
+    "rejectReasonLabel": "Rejection Reason:",
     "viewContent": "View full article",
     "coverPreviewLabel": "Cover image:",
     "coverPreviewAlt": "Cover image preview",

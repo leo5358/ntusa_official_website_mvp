@@ -165,6 +165,12 @@
     "unpublishedNotice": "注意：",
     "unpublishedBody": "這篇文章目前的狀態為",
     "unpublishedBodyTail": "，尚未對外公開。此頁面目前僅有內部人員可見。",
+    "status": {
+      "APPROVED": "已核准",
+      "REJECTED": "已退回",
+      "PENDING": "審核中",
+      "DRAFT": "草稿"
+    },
     "authorLabel": "作者：",
     "publishedLabel": "發布時間：",
     "backToHome": "返回首頁",
@@ -213,6 +219,7 @@
     "emptyDept": "您目前尚未提交過任何文章",
     "submitterLabel": "提交者信箱：",
     "submittedAtLabel": "提交時間：",
+    "rejectReasonLabel": "退回原因：",
     "viewContent": "檢視文章完整內容",
     "coverPreviewLabel": "封面圖片：",
     "coverPreviewAlt": "封面圖片預覽",

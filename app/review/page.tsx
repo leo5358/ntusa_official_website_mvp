@@ -92,6 +92,11 @@ export default async function ReviewDashboard() {
                       </p>
                     )}
                     <p><span className="font-medium">{t("submittedAtLabel")}</span> {new Date(post.createdAt).toLocaleString(t("dateLocale"), { timeZone: "Asia/Taipei" })}</p>
+                    {post.status === "REJECTED" && post.rejectReason && (
+                      <p className="mt-2 p-2 bg-red-50 border border-red-100 rounded text-red-700">
+                        <span className="font-bold">{t("rejectReasonLabel")}</span> {post.rejectReason}
+                      </p>
+                    )}
                   </div>
                 </div>
 
