@@ -179,6 +179,7 @@
   "editor": {
     "authVerifying": "Verifying your identity…",
     "pageTitle": "Publish a new article",
+    "departmentLabel": "Publishing Department",
     "titleLabel": "Article title",
     "titlePlaceholder": "Enter a strong title…",
     "coverLabel": "Cover image",

@@ -11,9 +11,10 @@ import { uploadImage } from "../lib/upload";
 
 interface EditorProps {
   authorEmail: string;
+  department?: string;
 }
 
-export default function Editor({ authorEmail }: EditorProps) {
+export default function Editor({ authorEmail, department }: EditorProps) {
   const router = useRouter();
   const t = useTranslations("editor");
   const tToolbar = useTranslations("editor.toolbar");
@@ -113,6 +114,14 @@ export default function Editor({ authorEmail }: EditorProps) {
 
   return (
     <div className="flex flex-col gap-6 text-gray-900">
+      {/* 部門顯示 (唯讀) */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t("departmentLabel")}</label>
+        <div className="w-full px-4 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-600 font-medium">
+          {department || "一般部門"}
+        </div>
+      </div>
+
       {/* 標題區 */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">{t("titleLabel")}</label>

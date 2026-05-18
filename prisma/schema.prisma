@@ -15,13 +15,14 @@ enum PostStatus {
 }
 
 model Post {
-  id          String     @id @default(cuid())
-  title       String
-  content     String
-  coverImage  String?
-  authorEmail String
-  status      PostStatus @default(PENDING) // 新增狀態欄位，預設為待審核
+  id           String     @id @default(cuid())
+  title        String
+  content      String
+  coverImage   String?
+  authorEmail  String
+  department   String?    // 新增部門欄位
+  status       PostStatus @default(PENDING) // 新增狀態欄位，預設為待審核
   rejectReason String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }

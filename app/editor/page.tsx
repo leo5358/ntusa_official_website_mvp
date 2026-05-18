@@ -29,8 +29,11 @@ export default function EditorPage() {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-sm mt-8 rounded-lg">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">{t("pageTitle")}</h1>
-      {/* 呼叫真正的編輯器核心組件，並把作者的信箱傳進去 */}
-      <Editor authorEmail={session?.user?.email as string} />
+      {/* 呼叫真正的編輯器核心組件，並把作者的信箱與部門傳進去 */}
+      <Editor 
+        authorEmail={session?.user?.email as string} 
+        department={session?.user?.department as string}
+      />
     </div>
   );
 }

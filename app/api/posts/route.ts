@@ -37,6 +37,7 @@ export async function POST(request: Request) {
         content,
         coverImage,
         authorEmail, // 使用後端取得的信箱
+        department: session.user.department, // 存入發文者的部門
       },
     });
 

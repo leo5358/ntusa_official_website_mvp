@@ -6,9 +6,6 @@ import { getTranslations } from "next-intl/server";
 import ReviewButtons from "../../components/ReviewButtons";
 import Link from "next/link";
 
-// 💡 這裡設定公關部的信箱（可以設定多個），匹配到的人就有審核權限
-const PR_EMAILS = ["liyu.yang@ntusa.ntu.edu.tw", "admin@ntusa.ntu.edu.tw", "shippo.hsu@ntusa.ntu.edu.tw"];
-
 type StatusLabels = { approved: string; rejected: string; pending: string };
 
 // 輔助元件：狀態標籤
@@ -27,12 +24,14 @@ const StatusBadge = ({ status, labels }: { status: string; labels: StatusLabels 
 export default async function ReviewDashboard() {
   // 1. 權限驗證
   const session = await getServerSession(authOptions);
-  if (!session || !session.user?.email) {
+  if (!session || !session.user) {
     redirect("/api/auth/signin");
   }
 
-  const userEmail = session.user.email;
-  const isPR = PR_EMAILS.includes(userEmail);
+  const userRole = session.user.role;
+  const userDepartment = session.user.department;
+  const userEmail = session.user.email || "";
+  const isPR = userRole === "admin" || userRole === "reviewer";
 
   const t = await getTranslations("review");
   const statusLabels: StatusLabels = {
@@ -43,10 +42,13 @@ export default async function ReviewDashboard() {
 
   // 2. 根據身分撈取文章
   // - 公關部 (isPR): 撈取所有「待審核 (PENDING)」的文章
-  // - 一般部門: 撈取「自己部門 (authorEmail)」發布的所有文章
+  // - 一般部門: 撈取「自己部門 (department)」的所有文章
   const targetPosts = isPR
     ? await prisma.post.findMany({ where: { status: "PENDING" }, orderBy: { createdAt: "desc" } })
-    : await prisma.post.findMany({ where: { authorEmail: userEmail }, orderBy: { createdAt: "desc" } });
+    : await prisma.post.findMany({ 
+        where: { department: userDepartment || "一般部門" }, 
+        orderBy: { createdAt: "desc" } 
+      });
 
   return (
     <div className="max-w-5xl mx-auto p-8 pt-24">

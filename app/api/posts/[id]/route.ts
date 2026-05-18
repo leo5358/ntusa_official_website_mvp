@@ -8,9 +8,6 @@ import ApprovalNotificationEmail from "../../../../components/emails/ApprovalNot
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// 統一在此處定義公關部信箱
-const PR_EMAILS = ["liyu.yang@ntusa.ntu.edu.tw", "admin@ntusa.ntu.edu.tw", "shippo.hsu@ntusa.ntu.edu.tw"];
-
 // DELETE 方法：刪除文章
 export async function DELETE(
   request: Request,
@@ -30,12 +27,16 @@ export async function DELETE(
       return NextResponse.json({ errorCode: "POST_NOT_FOUND" }, { status: 404 });
     }
 
-    // [修正] 權限驗證：只有「原作者本人」或「公關部」可以刪除文章
+    // [修正] 權限驗證：只有「原作者本人」、「同部門成員」或「具備管理權限 (admin/reviewer)」可以刪除文章
     const userEmail = session.user.email;
-    const isAuthor = post.authorEmail === userEmail;
-    const isPR = PR_EMAILS.includes(userEmail);
+    const userRole = session.user.role;
+    const userDepartment = session.user.department;
 
-    if (!isAuthor && !isPR) {
+    const isAuthor = post.authorEmail === userEmail;
+    const isDeptMember = post.department === userDepartment;
+    const canManageAll = userRole === "admin" || userRole === "reviewer";
+
+    if (!isAuthor && !isDeptMember && !canManageAll) {
       return NextResponse.json({ errorCode: "FORBIDDEN_DELETE" }, { status: 403 });
     }
 
@@ -59,9 +60,9 @@ export async function PATCH(
       return NextResponse.json({ errorCode: "UNAUTHORIZED" }, { status: 401 });
     }
 
-    // [修正] 嚴格驗證權限：必須是公關部信箱才能執行審核操作
-    const userEmail = session.user.email;
-    if (!PR_EMAILS.includes(userEmail)) {
+    // [修正] 嚴格驗證權限：必須是具備管理權限 (admin/reviewer) 才能執行審核操作
+    const userRole = session.user.role;
+    if (userRole !== "admin" && userRole !== "reviewer") {
       return NextResponse.json({ errorCode: "FORBIDDEN_REVIEW" }, { status: 403 });
     }
 

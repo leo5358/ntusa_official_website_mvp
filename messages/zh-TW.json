@@ -179,6 +179,7 @@
   "editor": {
     "authVerifying": "驗證身分中...",
     "pageTitle": "發布新文章",
+    "departmentLabel": "發布部門",
     "titleLabel": "文章標題",
     "titlePlaceholder": "請輸入一個響亮的標題...",
     "coverLabel": "封面圖片",
