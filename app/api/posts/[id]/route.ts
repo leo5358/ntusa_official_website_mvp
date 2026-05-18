@@ -5,8 +5,14 @@ import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
 import { Resend } from "resend";
 import ApprovalNotificationEmail from "../../../../components/emails/ApprovalNotificationEmail";
+import ReviewRequestEmail from "../../../../components/emails/ReviewRequestEmail";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// 從 .env 讀取審核者信箱清單
+const PR_EMAILS = process.env.REVIEWER_EMAILS 
+  ? process.env.REVIEWER_EMAILS.split(",").map(email => email.trim())
+  : ["admin@ntusa.ntu.edu.tw"];
 
 // DELETE 方法：刪除文章
 export async function DELETE(
@@ -140,6 +146,24 @@ export async function PATCH(
           rejectReason: null, // 清空先前的退回原因
         },
       });
+
+      // 3. 寄送「文章已修改並重新送審」通知信給公關部
+      try {
+        await resend.emails.send({
+          from: "NTUSA Website<noreply@notify.ntusa.ntu.edu.tw>",
+          to: PR_EMAILS,
+          subject: `【更新通知】文章已修改並重新送審：「${updatedPost.title}」`,
+          react: ReviewRequestEmail({
+            postTitle: updatedPost.title,
+            authorEmail: userEmail,
+            authorName: session.user.name || undefined,
+            department: session.user.department || undefined,
+          }) as React.ReactElement,
+        });
+        console.log("成功發送文章修改通知信給公關部");
+      } catch (emailError) {
+        console.error("發送文章修改通知信失敗:", emailError);
+      }
 
       revalidatePath("/");
       return NextResponse.json(updatedPost, { status: 200 });
