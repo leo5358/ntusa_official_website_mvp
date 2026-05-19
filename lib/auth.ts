@@ -2,10 +2,8 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { getUserGroups } from "./google-admin";
 
-const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith("https://");
-const cookiePrefix = useSecureCookies ? "__Secure-" : "";
-
 export const authOptions: NextAuthOptions = {
+  // 確保使用環境變數中的 Secret
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
     GoogleProvider({
@@ -13,32 +11,11 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
   ],
-  // 關鍵設定：如果是 https 環境，強制啟用安全 Cookie
-  useSecureCookies: useSecureCookies,
-  cookies: {
-    sessionToken: {
-      name: `${cookiePrefix}next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: useSecureCookies,
-      },
-    },
-  },
+  // 移除手動 Cookie 設定，讓 NextAuth 根據 NEXTAUTH_URL 自動處理 (這最穩定)
   callbacks: {
     async signIn({ user }) {
       const isAllowedToSignIn = user.email?.endsWith("@ntusa.ntu.edu.tw");
       return !!isAllowedToSignIn;
-    },
-    async redirect({ url, baseUrl }) {
-      // 確保即使在反向代理後方，跳轉網址也維持 https
-      if (url.startsWith("http://ntusa.ntu.edu.tw")) {
-        return url.replace("http://", "https://");
-      }
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      else if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
     },
     async jwt({ token, user, account }) {
       if (account && user && user.email) {
@@ -81,4 +58,8 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+  // 針對反向代理的優化
+  pages: {
+    signIn: '/api/auth/signin',
+  }
 };
