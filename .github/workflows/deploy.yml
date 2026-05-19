@@ -31,6 +31,18 @@ jobs:
                -d '{"content": "台大學生會官網部署成功！"}' \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
 
+      - name: Notify Slack on Success
+        if: success()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{
+            \"status\": \"部署成功\",
+            \"repo\": \"${{ github.repository }}\",
+            \"actor\": \"${{ github.actor }}\",
+            \"log_url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
+          }" \
+          ${{ secrets.SLACK_WORKFLOW_URL }}
+
       - name: Notify Discord on Failure
         if: failure() # 如果前面的部署步驟失敗，就會觸發這個通知
         run: |
@@ -38,3 +50,15 @@ jobs:
                -X POST \
                -d '{"content": "警告：台大學生會官網部署失敗，請檢查 GitHub Actions Log。"}' \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Notify Slack on Failure
+        if: failure()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{
+            \"status\": \"部署失敗\",
+            \"repo\": \"${{ github.repository }}\",
+            \"actor\": \"${{ github.actor }}\",
+            \"log_url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
+          }" \
+          ${{ secrets.SLACK_WORKFLOW_URL }}

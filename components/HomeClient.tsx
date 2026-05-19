@@ -268,11 +268,33 @@ export default function HomeClient({ posts }: { posts: PostType[] }) {
             </div>
           </div>
           <div className={`data-panel ${dataTab === "budget" ? "active" : ""}`}>
-            <div className="rights-placeholder-box fade-up-target">
-              <div className="placeholder-icon">💰</div>
-              <h3>{tData("budgetTitle")}</h3>
-              <p>{tData("budgetDesc1")}<br/>{tData("budgetDesc2")}</p>
-              <div className="placeholder-badge">{tData("budgetBadge")}</div>
+            <div className="fade-up-target">
+              <div className="section-header" style={{ marginBottom: "16px" }}>
+                <h3 className="section-title" style={{ fontSize: "1.5rem" }}>{tData("budgetTitle")}</h3>
+                <p className="section-sub">{tData("budgetDesc")}</p>
+              </div>
+              <iframe
+                src="https://drive.google.com/embeddedfolderview?id=1jziYHepOlmajQlV0lJKpnf1vpeW9dpBi#list"
+                title={tData("budgetTitle")}
+                style={{
+                  width: "100%",
+                  height: "600px",
+                  border: "1px solid var(--border, #e5e7eb)",
+                  borderRadius: "12px",
+                  background: "#fff",
+                }}
+                loading="lazy"
+              />
+              <div className="section-footer" style={{ marginTop: "16px" }}>
+                <a
+                  href="https://drive.google.com/drive/folders/1jziYHepOlmajQlV0lJKpnf1vpeW9dpBi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline"
+                >
+                  {tData("budgetOpenDrive")}
+                </a>
+              </div>
             </div>
           </div>
           <div className={`data-panel ${dataTab === "other" ? "active" : ""}`}>

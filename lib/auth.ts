@@ -5,6 +5,7 @@ import { getUserGroups } from "./google-admin";
 export const authOptions: NextAuthOptions = {
   // 1. 確保加入 secret
   secret: process.env.NEXTAUTH_SECRET, 
+  trustHost: true, 
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
