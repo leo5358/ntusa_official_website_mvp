@@ -12,15 +12,17 @@ import { uploadImage } from "../lib/upload";
 interface EditorProps {
   authorEmail: string;
   department?: string;
+  userRole?: string;
   initialData?: {
     id: string;
     title: string;
     content: string;
     coverImage: string | null;
+    status?: string;
   };
 }
 
-export default function Editor({ authorEmail, department, initialData }: EditorProps) {
+export default function Editor({ authorEmail, department, userRole, initialData }: EditorProps) {
   const router = useRouter();
   const t = useTranslations("editor");
   const tToolbar = useTranslations("editor.toolbar");
@@ -93,6 +95,17 @@ export default function Editor({ authorEmail, department, initialData }: EditorP
       const url = isEdit ? `/api/posts/${initialData.id}` : "/api/posts";
       const method = isEdit ? "PATCH" : "POST";
 
+      // 決定修改後的文章狀態
+      // 1. 如果是新文章，不傳 status (由後端預設為 PENDING)
+      // 2. 如果是修改文章：
+      //    - 如果是公關部或 Admin 修改，則維持原狀 (可能是已核准)
+      //    - 如果是其他部門修改，則一律回到 PENDING 重新審核
+      let targetStatus = undefined;
+      if (isEdit) {
+        const isReviewer = userRole === "admin" || department === "公關部";
+        targetStatus = isReviewer ? (initialData?.status || "PENDING") : "PENDING";
+      }
+
       const res = await fetch(url, {
         method: method,
         headers: { "Content-Type": "application/json" },
@@ -101,12 +114,12 @@ export default function Editor({ authorEmail, department, initialData }: EditorP
           content: editor.getHTML(),
           coverImage,
           authorEmail,
-          status: isEdit ? "PENDING" : undefined, // 編輯後重新進入待審核狀態
+          status: targetStatus,
         }),
       });
 
       if (res.ok) {
-        alert(isEdit ? t("updateSuccess") : t("submitSuccess"));
+        alert(isEdit && targetStatus === "APPROVED" ? t("updateSuccessNoReview") || t("updateSuccess") : (isEdit ? t("updateSuccess") : t("submitSuccess")));
         router.push(isEdit ? "/review" : "/");
       } else {
         throw new Error(isEdit ? t("updateFailedInternal") : t("submitFailedInternal"));

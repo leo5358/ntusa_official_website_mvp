@@ -47,11 +47,13 @@ export default async function EditPage({
       <Editor 
         authorEmail={session.user.email as string} 
         department={session.user.department as string}
+        userRole={session.user.role as string}
         initialData={{
           id: post.id,
           title: post.title,
           content: post.content,
           coverImage: post.coverImage,
+          status: post.status,
         }}
       />
     </div>

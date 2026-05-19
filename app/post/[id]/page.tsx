@@ -101,8 +101,8 @@ export default async function PostPage({
         dangerouslySetInnerHTML={{ __html: post.content }} 
       />
 
-      {/* 底部操作區塊：包含「返回首頁」與「刪除文章」 */}
-      <div className="mt-12 pt-8 border-t flex justify-between items-center">
+      {/* 底部操作區塊：包含「返回首頁」、「修改文章」與「刪除文章」 */}
+      <div className="mt-12 pt-8 border-t flex flex-wrap justify-between items-center gap-4">
         <Link href="/" className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center transition-colors">
           <svg className="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -110,10 +110,29 @@ export default async function PostPage({
           {t("backToHome")}
         </Link>
 
-        {/* 只有「文章原作者」才看得到刪除按鈕 */}
-        {session?.user?.email === post.authorEmail && (
-          <DeleteButton postId={post.id} />
-        )}
+        <div className="flex items-center gap-4">
+          {/* 權限驗證：只有「原作者本人」、「同部門成員」或「具備管理權限 (admin/公關部)」可以修改文章 */}
+          {session?.user && (
+            (session.user.email === post.authorEmail) || 
+            (session.user.department === post.department) || 
+            (session.user.role === "admin" || session.user.department === "公關部")
+          ) && (
+            <Link 
+              href={`/editor/${post.id}`}
+              className="px-6 py-2 bg-blue-50 text-blue-600 rounded-md text-sm font-bold hover:bg-blue-100 transition-colors border border-blue-200"
+            >
+              {t("editButton")}
+            </Link>
+          )}
+
+          {/* 刪除權限：只有「原作者本人」或「具備管理權限 (admin/公關部)」可以刪除文章 */}
+          {session?.user && (
+            (session.user.email?.toLowerCase() === post.authorEmail?.toLowerCase()) || 
+            (session.user.role === "admin" || session.user.department === "公關部")
+          ) && (
+            <DeleteButton postId={post.id} />
+          )}
+        </div>
       </div>
       
     </div>

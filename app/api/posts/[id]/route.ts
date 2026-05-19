@@ -33,16 +33,15 @@ export async function DELETE(
       return NextResponse.json({ errorCode: "POST_NOT_FOUND" }, { status: 404 });
     }
 
-    // [修正] 權限驗證：只有「原作者本人」、「同部門成員」或「具備管理權限 (admin/公關部)」可以刪除文章
+    // [修正] 權限驗證：只有「原作者本人」或「具備管理權限 (admin/公關部)」可以刪除文章
     const userEmail = session.user.email;
     const userRole = session.user.role;
     const userDepartment = session.user.department;
 
-    const isAuthor = post.authorEmail === userEmail;
-    const isDeptMember = post.department === userDepartment;
+    const isAuthor = post.authorEmail?.toLowerCase() === userEmail?.toLowerCase();
     const isReviewer = userRole === "admin" || userDepartment === "公關部";
 
-    if (!isAuthor && !isDeptMember && !isReviewer) {
+    if (!isAuthor && !isReviewer) {
       return NextResponse.json({ errorCode: "FORBIDDEN_DELETE" }, { status: 403 });
     }
 
@@ -136,33 +135,39 @@ export async function PATCH(
         return NextResponse.json({ errorCode: "FORBIDDEN_UPDATE" }, { status: 403 });
       }
 
+      // [調整] 為了測試與安全性，只要是透過編輯器修改內容，一律回到 PENDING 重新審核
+      // 除非是公關部在審核介面單純變更狀態 (那會走上面 status && !title 的分支)
+      const finalStatus = "PENDING";
+
       const updatedPost = await prisma.post.update({
         where: { id },
         data: {
           title: title || post.title,
           content: content || post.content,
           coverImage: coverImage !== undefined ? coverImage : post.coverImage,
-          status: status || "PENDING", // 修改後預設回到待審核
+          status: finalStatus,
           rejectReason: null, // 清空先前的退回原因
         },
       });
 
-      // 3. 寄送「文章已修改並重新送審」通知信給公關部
-      try {
-        await resend.emails.send({
-          from: "NTUSA Website<noreply@notify.ntusa.ntu.edu.tw>",
-          to: PR_EMAILS,
-          subject: `【更新通知】文章已修改並重新送審：「${updatedPost.title}」`,
-          react: ReviewRequestEmail({
-            postTitle: updatedPost.title,
-            authorEmail: userEmail,
-            authorName: session.user.name || undefined,
-            department: session.user.department || undefined,
-          }) as React.ReactElement,
-        });
-        console.log("成功發送文章修改通知信給公關部");
-      } catch (emailError) {
-        console.error("發送文章修改通知信失敗:", emailError);
+      // 3. 寄送「文章已修改並重新送審」通知信給公關部 (僅當狀態為 PENDING 時)
+      if (finalStatus === "PENDING") {
+        try {
+          await resend.emails.send({
+            from: "NTUSA Website<noreply@notify.ntusa.ntu.edu.tw>",
+            to: PR_EMAILS,
+            subject: `【更新通知】文章已修改並重新送審：「${updatedPost.title}」`,
+            react: ReviewRequestEmail({
+              postTitle: updatedPost.title,
+              authorEmail: userEmail,
+              authorName: session.user.name || undefined,
+              department: session.user.department || undefined,
+            }) as React.ReactElement,
+          });
+          console.log("成功發送文章修改通知信給公關部");
+        } catch (emailError) {
+          console.error("發送文章修改通知信失敗:", emailError);
+        }
       }
 
       revalidatePath("/");

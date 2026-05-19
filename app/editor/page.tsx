@@ -33,6 +33,7 @@ export default function EditorPage() {
       <Editor 
         authorEmail={session?.user?.email as string} 
         department={session?.user?.department as string}
+        userRole={session?.user?.role as string}
       />
     </div>
   );

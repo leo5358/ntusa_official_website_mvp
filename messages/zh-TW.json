@@ -179,6 +179,7 @@
     "deleteError": "發生錯誤，請稍後再試。",
     "deleteFailedInternal": "刪除失敗",
     "deleteButton": "刪除文章",
+    "editButton": "修改文章",
     "deleteButtonLoading": "刪除中..."
   },
   "editor": {
@@ -205,6 +206,7 @@
     "missingFields": "請填寫標題與內容！",
     "submitSuccess": "文章發布成功！",
     "updateSuccess": "文章更新成功，已重新送交審核！",
+    "updateSuccessNoReview": "文章更新成功！",
     "submitError": "系統發生錯誤，請稍後再試。",
     "submitFailedInternal": "發布失敗",
     "updateFailedInternal": "更新失敗",

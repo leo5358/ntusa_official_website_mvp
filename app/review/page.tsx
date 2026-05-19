@@ -103,8 +103,8 @@ export default async function ReviewDashboard() {
                 {/* 只有公關部能看到審核按鈕 (Approve / Reject) */}
                 {isPR && <ReviewButtons postId={post.id} />}
 
-                {/* 作者或同部門成員可以看到「修改」按鈕 (且文章不是已核准狀態時最有用) */}
-                {!isPR && (post.status === "REJECTED" || post.status === "PENDING") && (
+                {/* 作者或同部門成員可以看到「修改」按鈕 */}
+                {!isPR && (
                   <Link
                     href={`/editor/${post.id}`}
                     className="px-4 py-2 bg-blue-50 text-blue-600 rounded-md text-sm font-bold hover:bg-blue-100 transition-colors border border-blue-200"
