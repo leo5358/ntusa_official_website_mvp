@@ -5,7 +5,6 @@ import { getUserGroups } from "./google-admin";
 export const authOptions: NextAuthOptions = {
   // 1. 確保加入 secret
   secret: process.env.NEXTAUTH_SECRET, 
-  trustHost: true, 
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -24,6 +23,16 @@ export const authOptions: NextAuthOptions = {
         return false; 
       }
     },
+    async redirect({ url, baseUrl }) {
+      // 修正反向代理導致的 http/https 協議不匹配問題
+      if (url.startsWith("http://ntusa.ntu.edu.tw")) {
+        return url.replace("http://", "https://");
+      }
+      // 確保重新導向網址始終在同一個網域下
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
     async jwt({ token, user, account }) {
       // 第一次登入時，從 Google Directory API 取得群組資訊
       if (account && user && user.email) {
@@ -33,7 +42,7 @@ export const authOptions: NextAuthOptions = {
         let role: "admin" | "reviewer" | "editor" = "editor";
         let department: string = "一般部門";
 
-        // 根據群組信箱對應角色與部門 (請根據實際群組信箱修改)
+        // 根據群組信箱對應角色與部門
         for (const group of groups) {
           const groupEmail = group.email?.toLowerCase();
           console.log(`[NextAuth] Checking group: ${groupEmail}`);
@@ -47,7 +56,6 @@ export const authOptions: NextAuthOptions = {
             department = "公關部";
             break;
           } else if (groupEmail?.endsWith("@ntusa.ntu.edu.tw")) {
-            // 其他 @ntusa.ntu.edu.tw 的群組預設為 Editor
             role = "editor";
             department = group.name || groupEmail.split("@")[0];
           }
@@ -61,8 +69,8 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role || null;
-        session.user.department = token.department || null;
+        session.user.role = token.role as any;
+        session.user.department = token.department as any;
       }
       return session;
     },
