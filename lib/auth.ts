@@ -11,6 +11,17 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      // Force https for production domain to fix proxy issues
+      if (url.startsWith("http://ntusa.ntu.edu.tw")) {
+        return url.replace("http://", "https://");
+      }
+      return baseUrl;
+    },
     async signIn({ user }) {
       const isAllowedToSignIn = user.email?.endsWith("@ntusa.ntu.edu.tw");
       return !!isAllowedToSignIn;
