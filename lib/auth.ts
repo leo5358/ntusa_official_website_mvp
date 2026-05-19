@@ -66,7 +66,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  // 讓 NextAuth 知道它是在反向代理之後運作，強制使用安全 Cookie
+  // 讓 NextAuth 知道它是在反向代理之後運作，強制使用安全 Cookie (僅限 production)
   cookies: {
     pkceCodeVerifier: {
       name: 'next-auth.pkce.code_verifier',
@@ -74,7 +74,7 @@ export const authOptions: NextAuthOptions = {
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: true // 強制使用安全 Cookie
+        secure: process.env.NODE_ENV === "production" || process.env.NEXTAUTH_URL?.startsWith("https://")
       }
     }
   }
