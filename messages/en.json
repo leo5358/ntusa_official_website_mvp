@@ -138,10 +138,9 @@
       "minutesDesc1": "This area will embed Google Docs or Google Sheets,",
       "minutesDesc2": "where meeting minutes will be published.",
       "minutesBadge": "Google Docs / Sheets embed",
-      "budgetTitle": "Budgets and Final Accounts",
-      "budgetDesc1": "This area will embed Google Sheets,",
-      "budgetDesc2": "where budget data will be published.",
-      "budgetBadge": "Google Sheets embed",
+      "budgetTitle": "Historical Budgets and Final Accounts",
+      "budgetDesc": "Past budgets and final accounts of the Student Association, published on Google Drive.",
+      "budgetOpenDrive": "Open in Google Drive →",
       "otherTitle": "Other Documents",
       "otherDesc": "Additional public records will be added here over time.",
       "otherBadge": "Document embed"
