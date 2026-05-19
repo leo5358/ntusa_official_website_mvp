@@ -86,7 +86,7 @@ export default async function ReviewDashboard() {
                     {isPR && (
                       <p><span className="font-medium">{t("submitterLabel")}</span> {post.authorEmail}</p>
                     )}
-                    <p><span className="font-medium">{t("submittedAtLabel")}</span> {new Date(post.createdAt).toLocaleString(t("dateLocale"))}</p>
+                    <p><span className="font-medium">{t("submittedAtLabel")}</span> {new Date(post.createdAt).toLocaleString(t("dateLocale"), { timeZone: "Asia/Taipei" })}</p>
                   </div>
                 </div>
 
