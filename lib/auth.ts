@@ -3,15 +3,13 @@ import GoogleProvider from "next-auth/providers/google";
 import { getUserGroups } from "./google-admin";
 
 export const authOptions: NextAuthOptions = {
-  // 確保使用環境變數中的 Secret
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientSecret: process.env.NEXTAUTH_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET as string,
     }),
   ],
-  // 移除手動 Cookie 設定，讓 NextAuth 根據 NEXTAUTH_URL 自動處理 (這最穩定)
   callbacks: {
     async signIn({ user }) {
       const isAllowedToSignIn = user.email?.endsWith("@ntusa.ntu.edu.tw");
@@ -19,7 +17,6 @@ export const authOptions: NextAuthOptions = {
     },
     async jwt({ token, user, account }) {
       if (account && user && user.email) {
-        console.log(`[NextAuth] Initial sign-in for: ${user.email}`);
         try {
           const groups = await getUserGroups(user.email);
           let role: "admin" | "reviewer" | "editor" = "editor";
@@ -58,8 +55,4 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  // 針對反向代理的優化
-  pages: {
-    signIn: '/api/auth/signin',
-  }
 };
